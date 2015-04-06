@@ -13,66 +13,14 @@ import numpy as np
 
 ''' Random Variables
 '''
-class DiscreteRV(object):
+def BetaBinomial_pdf(n, a, b):
+    ''' BetaBinomial.
+    '''
+    k = np.arange(n + 1)
 
-    def __init__(self, q):
-        self._q = q
-        self.Q = np.cumsum(q)
+    probs = binom(n, k) * beta(k + a, n - k + b) / beta(a, b)
 
-    @property
-    def q(self):
-
-        return self._q
-
-    @q.setter
-    def q(self, val):
-
-        self._q = val
-        self.Q = np.cumsum(val)
-
-    def draw(self, k=1):
-
-        return self.Q.searchsorted(np.random.uniform(0, 1, size=k))
-
-class BetaBinomial(object):
-
-    def __init__(self, n, a, b):
-
-        self.n, self.a, self.b = n, a, b
-
-    @property
-    def mean(self):
-
-        n, a, b = self.n, self.a, self.b
-        return n * a / (a + b)
-
-    @property
-    def std(self):
-
-        return sqrt(self.var)
-
-    @property
-    def var(self):
-
-        n, a, b = self.n, self.a, self.b
-        top = n*a*b * (a + b + n)
-        btm = (a+b)**2.0 * (a+b+1.0)
-        return top / btm
-
-    @property
-    def skew(self):
-
-        n, a, b = self.n, self.a, self.b
-        t1 = (a+b+2*n) * (b - a) / (a+b+2)
-        t2 = sqrt((1+a+b) / (n*a*b * (n+a+b)))
-        return t1 * t2
-
-    def pdf(self):
-
-        n, a, b = self.n, self.a, self.b
-        k = np.arange(n + 1)
-        probs = binom(n, k) * beta(k + a, n - k + b) / beta(a, b)
-        return probs
+    return probs
 
 ''' Graphs
 '''
