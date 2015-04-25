@@ -68,7 +68,7 @@ def _setup_executable():
     """
     try:
 
-        os.system('mkdir /home/vagrant/bin')
+        os.mkdir('/home/vagrant/bin')
 
     except OSError:
 
