@@ -22,4 +22,4 @@ os.system('http://download.jetbrains.com/python/pycharm-professional-4.0.6.tar.g
 
 os.system('sudo mkdir -p /opt/PyCharm')
 
-os.sytem('sudo tar -zxvf pycharm-community-3.0.tar.gz --strip-components 1 -C /opt/PyCharm')
+os.system('sudo tar -zxvf pycharm-community-3.0.tar.gz --strip-components 1 -C /opt/PyCharm')
