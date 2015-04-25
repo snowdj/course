@@ -75,7 +75,7 @@ def _setup_executable():
         pass
 
 
-os.system('ln -sf /opt/PyCharm/bin/pycharm.sh /home/vagrant/bin/pycharm')
+    os.system('ln -sf /opt/PyCharm/bin/pycharm.sh /home/vagrant/bin/pycharm')
 
 """ Execution of module as script.
 """
