@@ -14,7 +14,7 @@ os.system('sudo add-apt-repository ppa:webupd8team/java')
 
 os.system('sudo apt-get update')
 
-os.system('sudo apt-get install oracle-java7-installer')
+os.system('echo | sudo apt-get install oracle-java7-installer')
 
 
 # Install PyCharm
