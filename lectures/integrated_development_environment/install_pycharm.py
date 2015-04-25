@@ -13,7 +13,7 @@
 
     in the terminal.
 
-    Afterwards, you can start pycharm by typing
+    Afterwards, you can start PyCcharm by typing
 
         pycharm
 
