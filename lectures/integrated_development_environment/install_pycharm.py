@@ -18,7 +18,7 @@ os.system('sudo apt-get install oracle-java7-installer')
 
 
 # Install PyCharm
-os.system('http://download.jetbrains.com/python/pycharm-professional-4.0.6.tar.gz')
+os.system('wget http://download.jetbrains.com/python/pycharm-professional-4.0.6.tar.gz')
 
 os.system('sudo mkdir -p /opt/PyCharm')
 
