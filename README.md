@@ -1,6 +1,6 @@
 # Course
 
-This repository contains the course material for *Software Engineering for Economists*. Check out the syllabus for details.
+This repository contains the material for the course *Software Engineering for Economists*. Check out the syllabus for details.
 
 Additional Information:
 
