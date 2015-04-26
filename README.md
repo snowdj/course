@@ -1,8 +1,6 @@
 # Course
 
-This repository contains the course material for *Software Engineering for Economists*. 
-
-We acquire basic software engineering skills to tackle computer-intensive economic research projects. For example, we explore version control, unit testing, cloud computing, design patterns, debugging and profiling techniques. These basic techniques allow us to leverage tools from computational science, increase the transparency of our implementations, and ensure the recomputability of results. Thus, they expand the set of possible economic questions that we can address and improve the quality of our answers.
+This repository contains the course material for *Software Engineering for Economists*. Check out the syllabus for details.
 
 Additional Information:
 
