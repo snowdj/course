@@ -19,7 +19,7 @@ Contact:
 
 ### Notebooks
 * [Introduction](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/class_introduction/lecture.ipynb)
-* [Python Interview](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/python_overview/lecture.ipynb)
+* [Python Overview](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/python_overview/lecture.ipynb)
 * [Cloud Computing](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/cloud_computing/lecture.ipynb)
 * Economic Models
  * [Carrer Choices](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/economic_models/career_choices/lecture.ipynb)
