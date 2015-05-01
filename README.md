@@ -28,5 +28,5 @@ Contact:
 * [Version Control](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/version_control/lecture.ipynb) 
 
 ### Guest Lectures
-* [Research Computing Center]
-* [Social Sciences Computing Services]
+* [Research Computing Center](https://github.com/softEcon/course/blob/master/resource_centers/research_computing_center.pdf)
+* [Social Sciences Computing Services](https://github.com/softEcon/course/blob/master/resource_centers/social_sciences_computing_services.pdf)
