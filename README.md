@@ -17,7 +17,7 @@ Contact:
 
 ## Material
 
-### Notebooks
+### Lectures
 * [Introduction](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/class_introduction/lecture.ipynb)
 * [Python Overview](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/python_overview/lecture.ipynb)
 * [Cloud Computing](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/cloud_computing/lecture.ipynb)
@@ -27,6 +27,6 @@ Contact:
 * [Integrated Development Environment](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/integrated_development_environment/lecture.ipynb) 
 * [Version Control](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/version_control/lecture.ipynb) 
 
-### Guest Lectures
+### Guest Presentations
 * [Research Computing Center](https://github.com/softEcon/course/blob/master/resource_centers/research_computing_center.pdf)
 * [Social Sciences Computing Services](https://github.com/softEcon/course/blob/master/resource_centers/social_sciences_computing_services.pdf)
