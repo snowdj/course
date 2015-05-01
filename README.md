@@ -23,6 +23,6 @@ Notebooks
 * [Cloud Computing](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/cloud_computing/lecture.ipynb)
 * Economic Models
  * [Carrer Choices](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/economic_models/career_choices/lecture.ipynb)
- * [Job Search](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/economic_models/job_search/lecture.ipynb)\
+ * [Job Search](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/economic_models/job_search/lecture.ipynb)
 * [Integrated Development Environment](https://github.com/softEcon/course/blob/master/lectures/integrated_development_environment/lecture.ipynb) 
 * [Version Control](https://github.com/softEcon/course/blob/master/lectures/version_control/lecture.ipynb) 
