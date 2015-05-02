@@ -7,10 +7,6 @@ that we can address and improve the quality of our answers.
 
 Check out the course syllabus for details.
 
-Additional Information:
-
-http://www.policy-lab.org/softEcon/course
-
 Contact:
 
 [![Join the chat at https://gitter.im/softEcon/course](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/softEcon/course?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -24,6 +20,7 @@ Contact:
 * Economic Models
  * [Carrer Choices](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/economic_models/career_choices/lecture.ipynb)
  * [Job Search](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/economic_models/job_search/lecture.ipynb)
+ * [Generalized Roy](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/economic_models/generalized_roy/lecture.ipynb)
 * [Integrated Development Environment](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/integrated_development_environment/lecture.ipynb) 
 * [Version Control](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/version_control/lecture.ipynb) 
 
