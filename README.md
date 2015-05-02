@@ -1,6 +1,6 @@
 # Course
 
-This repository contains the material for the course *Software Engineering for Economists*. 
+This repository contains the material for the *Software Engineering for Economists* course. 
 
 We acquire fundamental software engineering skills to tackle computer intensive economic research projects. These basic techniques allow us to leverage tools from computational science, increase the transparency of our implementations, and ensure the recomputability of results. Thus, they expand the set of possible economic questions
 that we can address and improve the quality of our answers.
