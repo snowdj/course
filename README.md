@@ -24,6 +24,10 @@ Contact:
 * [Integrated Development Environment](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/integrated_development_environment/lecture.ipynb) 
 * [Version Control](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/version_control/lecture.ipynb) 
 
-### Guest Presentations
-* [Research Computing Center](https://github.com/softEcon/course/blob/master/resource_centers/research_computing_center.pdf)
-* [Social Sciences Computing Services](https://github.com/softEcon/course/blob/master/resource_centers/social_sciences_computing_services.pdf)
+## Guest Presentations
+
+Robin Weiss for the [Research Computing Center](https://github.com/softEcon/course/blob/master/resource_centers/research_computing_center.pdf)
+
+### 04/27/15 
+
+Steven Mohr for the [Social Sciences Computing Services](https://github.com/softEcon/course/blob/master/resource_centers/social_sciences_computing_services.pdf)
