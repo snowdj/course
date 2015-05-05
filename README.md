@@ -26,6 +26,8 @@ Contact:
 
 ## Guest Presentations
 
+Please visit [here](https://github.com/softEcon/course/tree/master/resource_centers) for supporting material.
+
 ### 04/20/15 
 
 Robin Weiss for the [*Research Computing Center*](https://github.com/softEcon/course/blob/master/resource_centers/research_computing_center.pdf)
