@@ -45,7 +45,7 @@ def process():
         # Type conversion
         if name in ['agents', 'maxiter']:
             val = int(val)
-        elif name in ['file', 'optimizer', 'start']:
+        elif name in ['file', 'optimizer', 'start', 'version']:
             val = str(val)
         else:
             val = float(val)
@@ -85,8 +85,12 @@ def _check_integrity(dict_):
     # Check starting values
     assert (dict_['ESTIMATION']['start'] in ['random', 'init', 'zero'])
 
-    # Maximum iterations.
-    assert (dict_['ESTIMATION']['maxiter'] > 0)
+    # Maximum iterations
+    assert (dict_['ESTIMATION']['maxiter'] >= 0)
+
+    # Implementations
+    assert (dict_['ESTIMATION']['version'] in ['functional', 'object', 'optimized'])
+    assert (dict_['ESTIMATION']['version'] in ['functional'])
 
     # Finishing
     return True

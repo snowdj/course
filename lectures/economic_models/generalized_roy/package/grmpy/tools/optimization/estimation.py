@@ -205,13 +205,44 @@ def _get_start(which, init_dict):
         x0 = np.zeros(num_paras)
     elif which == 'random':
         x0 = np.random.uniform(size=num_paras)
+
+        # Variances
+        x0[(-4)] = max(x0[(-4)], 0.01)
+        x0[(-3)] = max(x0[(-3)], 0.01)
+
+        # Correlations
+        x0[(-2)] -= - 0.5
+        x0[(-1)] -= - 0.5
+
     elif which == 'init':
         x0 = init_dict['AUX']['start_values']
     else:
         raise AssertionError
+
+    # Transform to real line
+    x0 = _transform_start(x0)
 
     # Quality assurance.
     assert (np.all(np.isfinite(x0)))
 
     # Finishing.
     return x0
+
+
+def _transform_start(x):
+    """ Transform starting values to cover the whole real line.
+    """
+
+    # Coefficients
+    x[:(-4)] = x[:(-4)]
+
+    # Variances
+    x[(-4)] = np.log(x[(-4)])
+    x[(-3)] = np.log(x[(-3)])
+
+    # Correlations
+    x[(-2)] = -np.log(-1.0 + 2.0/(x[(-2) + 1]))
+    x[(-1)] = -np.log(-1.0 + 2.0/(x[(-1) + 1]))
+
+    # Finishing
+    return x
