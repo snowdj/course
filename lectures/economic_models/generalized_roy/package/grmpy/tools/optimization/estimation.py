@@ -13,13 +13,14 @@ from tools.user.processing import process
 ''' Main function '''
 
 
-def estimate():
+def estimate(init_dict):
     """ Estimate the generalized Roy model.
     """
 
-    # Load model information
-    init_dict = process()
+    # Antibugging
+    assert (isinstance(init_dict, dict))
 
+    # Load dataset
     Y, D, X, Z = _load_data()
 
     # Create auxiliary objects
@@ -104,7 +105,7 @@ def _negative_log_likelihood(args, Y, D, X, Z):
 
     # Auxiliary objects.
     num_agents = Y.shape[0]
-    choiceCoeffs = np.concatenate((Y1_coeffs - Y0_coeffs, - C_coeffs))
+    choice_coeffs = np.concatenate((Y1_coeffs - Y0_coeffs, - C_coeffs))
 
     # Likelihood construction.
     likl = 0.00
@@ -112,7 +113,7 @@ def _negative_log_likelihood(args, Y, D, X, Z):
     for i in range(num_agents):
 
         G = np.concatenate((X[i, :], Z[i, :]))
-        idx = np.dot(choiceCoeffs, G)
+        idx = np.dot(choice_coeffs, G)
 
         if D[i] == 1.00:
 
@@ -195,15 +196,13 @@ def _get_start(which, init_dict):
     """ Get different kind of starting values.
     """
     # Antibugging.
-    assert (which in ['zeros', 'random', 'init'])
+    assert (which in ['random', 'init'])
 
     # Distribute auxiliary objects
     num_paras = init_dict['AUX']['num_paras']
 
     # Select relevant values.
-    if which == 'zeros':
-        x0 = np.zeros(num_paras)
-    elif which == 'random':
+    if which == 'random':
         x0 = np.random.uniform(size=num_paras)
 
         # Variances
@@ -215,7 +214,7 @@ def _get_start(which, init_dict):
         x0[(-1)] -= - 0.5
 
     elif which == 'init':
-        x0 = init_dict['AUX']['start_values']
+        x0 = init_dict['AUX']['start_values'][:]
     else:
         raise AssertionError
 

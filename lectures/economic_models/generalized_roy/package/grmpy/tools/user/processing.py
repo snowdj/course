@@ -60,7 +60,7 @@ def process():
     dict_ = _add_auxiliary(dict_)
 
     # Check quality.
-    _check_integrity(dict_)
+    _check_integrity_process(dict_)
 
     # Finishing.
     return dict_
@@ -69,7 +69,7 @@ def process():
 ''' Auxiliary functions '''
 
 
-def _check_integrity(dict_):
+def _check_integrity_process(dict_):
     """ Check integrity of initFile dict.
     """
     # Antibugging
@@ -83,7 +83,7 @@ def _check_integrity(dict_):
     assert (dict_['ESTIMATION']['optimizer'] in ['bfgs', 'nm'])
 
     # Check starting values
-    assert (dict_['ESTIMATION']['start'] in ['random', 'init', 'zero'])
+    assert (dict_['ESTIMATION']['start'] in ['random', 'init'])
 
     # Maximum iterations
     assert (dict_['ESTIMATION']['maxiter'] >= 0)

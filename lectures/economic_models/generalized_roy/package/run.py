@@ -24,13 +24,13 @@ import grmpy as gp
 '''
 
 # Process initialization file
-gp.process()
+init_dict = gp.process()
 
 # Simulate synthetic sample
-gp.simulate()
+gp.simulate(init_dict)
 
 # Estimate generalize Roy model
-parameters = gp.estimate()
+parameters = gp.estimate(init_dict)
 
 # Inspect result
 print(parameters)

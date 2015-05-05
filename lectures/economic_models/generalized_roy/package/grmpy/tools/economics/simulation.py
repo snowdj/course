@@ -12,15 +12,15 @@ from tools.user.processing import process
 ''' Main function '''
 
 
-def simulate():
+def simulate(init_dict):
     """ Simulate a model based on the initialization file.
     """
 
     # Antibugging
-    assert (os.path.exists('init.ini'))
+    assert (isinstance(init_dict, dict))
 
-    # Read specification
-    init_dict = process()
+    # Ensure recomputability
+    np.random.seed(123)
 
     # Distribute information
     num_agents = init_dict['BASICS']['agents']
@@ -100,6 +100,9 @@ def simulate():
         # Observed outcomes.
         Y[i] = D[i] * Y1[i] + (1.0 - D[i]) * Y0[i]
 
+    # Check integrity
+    _check_integrity_simulate(Y1, Y0, Y, D)
+
     # Save to disk
     _write_out(Y, D, X, Z, file_name)
 
@@ -110,7 +113,7 @@ def simulate():
 ''' Auxiliary functions '''
 
 
-def _check_integrity(Y1, Y0, Y, D):
+def _check_integrity_simulate(Y1, Y0, Y, D):
     """ Check quality of simulated sample.
     """
     assert (np.all(np.isfinite(Y1)))
