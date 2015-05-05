@@ -35,3 +35,7 @@ Robin Weiss for the [*Research Computing Center*](https://rcc.uchicago.edu/)
 ### 04/27/15 
 
 Steven Mohr for the [*Social Sciences Computing Services*](https://sscs.uchicago.edu/)
+
+### 05/13/15
+
+Victor Zhorin for the [*Computation Institute*](https://www.ci.uchicago.edu/)
