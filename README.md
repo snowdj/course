@@ -38,7 +38,7 @@ Steven Mohr for the [*Social Sciences Computing Services*](https://sscs.uchicago
 
 ### 05/06/15
 
-Felix Tintelnot *TBD*
+Felix Tintelnot on *TBD*
 
 ### 05/13/15
 
