@@ -30,11 +30,10 @@ init_dict = gp.process()
 gp.simulate(init_dict)
 
 # Estimate generalize Roy model
-parameters = gp.estimate(init_dict)
+rslt = gp.estimate(init_dict)
 
 # Inspect result
-print(parameters)
-
+gp.inspect(init_dict, rslt)
 
 
 
