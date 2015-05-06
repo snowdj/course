@@ -12,12 +12,13 @@ from tools.user.processing import process
 ''' Main function '''
 
 
-def simulate(init_dict):
+def simulate(init_dict, unobserved=False):
     """ Simulate a model based on the initialization file.
     """
 
     # Antibugging
     assert (isinstance(init_dict, dict))
+    assert (unobserved in [True, False])
 
     # Ensure recomputability
     np.random.seed(123)
@@ -84,27 +85,32 @@ def simulate(init_dict):
     D = np.tile(np.nan, num_agents)
 
     for i in range(num_agents):
-        # Distribute unobservables.
-        U1, U0, V = U[i, 0], U[i, 1], U[i, 2]
 
-        # Decision Rule.
-        expectedBenefits = Y1_level[i] - Y0_level[i]
-        cost = C_level[i] + V
+        # Select individual unobservables and observables
+        u1, u0, v = U[i, 0], U[i, 1], U[i, 2]
 
-        D[i] = np.float((expectedBenefits - cost > 0))
+        y1_idx, y0_idx, c_idx = Y1_level[i], Y0_level[i], C_level[i]
 
-        # Potential outcomes.
-        Y1[i] = Y1_level[i] + U1
-        Y0[i] = Y0_level[i] + U0
+        # Decision Rule
+        expected_benefits = y1_idx - y0_idx
+        cost = c_idx + v
 
-        # Observed outcomes.
-        Y[i] = D[i] * Y1[i] + (1.0 - D[i]) * Y0[i]
+        d = np.float((expected_benefits - cost > 0))
+
+        # Potential outcomes
+        y1, y0 = y1_idx + u1, y0_idx + u0
+
+        # Observed outcomes
+        y = d * y1 + (1.0 - d) * y0
+
+        # Collect data matrices
+        Y[i], Y0[i], Y1[i], D[i] = y, y1, y0, d
 
     # Check integrity
     _check_integrity_simulate(Y1, Y0, Y, D)
 
     # Save to disk
-    _write_out(Y, D, X, Z, file_name)
+    _write_out(Y, D, X, Z, file_name, unobserved, Y1, Y0)
 
     # Return selected features of data
     return Y1, Y0, D
@@ -131,8 +137,19 @@ def _check_integrity_simulate(Y1, Y0, Y, D):
     assert (D.all() in [1.0, 0.0])
 
 
-def _write_out(Y, D, X, Z, file_name):
+def _write_out(Y, D, X, Z, file_name, unobserved=False, Y1=None,
+               Y0=None):
     """ Write out simulated data to file.
     """
 
-    np.savetxt(file_name, np.column_stack((Y, D, X, Z)), fmt='%8.3f')
+    if not unobserved:
+
+        np.savetxt(file_name, np.column_stack((Y, D, X, Z)), fmt='%8.3f')
+
+    else:
+
+        assert (isinstance(Y1, np.ndarray))
+        assert (isinstance(Y0, np.ndarray))
+
+        np.savetxt(file_name, np.column_stack((Y, D, X, Z, Y1, Y0)),
+                   fmt='%8.3f')

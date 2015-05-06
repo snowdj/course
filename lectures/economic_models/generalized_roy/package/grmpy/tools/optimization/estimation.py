@@ -72,17 +72,22 @@ def _distribute_parameters(x, num_covars_out):
     # Initialize containers
     rslt = dict()
 
+    rslt['TREATED'] = dict()
+    rslt['UNTREATED'] = dict()
+    rslt['COST'] = dict()
+    rslt['RHO'] = dict()
+
     # Distribute parameters
-    rslt['Y1_coeffs'] = x[:num_covars_out]
-    rslt['Y0_coeffs'] = x[num_covars_out:(2 * num_covars_out)]
+    rslt['TREATED']['all'] = x[:num_covars_out]
+    rslt['UNTREATED']['all'] = x[num_covars_out:(2 * num_covars_out)]
 
-    rslt['C_coeffs'] = x[(2 * num_covars_out):(-4)]
+    rslt['COST']['all'] = x[(2 * num_covars_out):(-4)]
 
-    rslt['U1_var'] = np.exp(x[(-4)])
-    rslt['U0_var'] = np.exp(x[(-3)])
+    rslt['TREATED']['var'] = np.exp(x[(-4)])
+    rslt['UNTREATED']['var'] = np.exp(x[(-3)])
 
-    rslt['U1V_rho'] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-2])))
-    rslt['U0V_rho'] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-1])))
+    rslt['RHO']['treated'] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-2])))
+    rslt['RHO']['untreated'] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-1])))
 
     # Finishing.
     return rslt
@@ -92,16 +97,16 @@ def _negative_log_likelihood(args, Y, D, X, Z):
     """ Negative Log-likelihood function of the Generalized Roy Model.
     """
     # Distribute parametrization
-    Y1_coeffs = np.array(args['Y1_coeffs'])
-    Y0_coeffs = np.array(args['Y0_coeffs'])
+    Y1_coeffs = np.array(args['TREATED']['all'])
+    Y0_coeffs = np.array(args['UNTREATED']['all'])
 
-    C_coeffs = np.array(args['C_coeffs'])
+    C_coeffs = np.array(args['COST']['all'])
 
-    U1_var = args['U1_var']
-    U0_var = args['U0_var']
+    U1_var = args['TREATED']['var']
+    U0_var = args['UNTREATED']['var']
 
-    U1V_rho = args['U1V_rho']
-    U0V_rho = args['U0V_rho']
+    U1V_rho = args['RHO']['treated']
+    U0V_rho = args['RHO']['untreated']
 
     # Auxiliary objects.
     num_agents = Y.shape[0]
@@ -141,7 +146,7 @@ def _negative_log_likelihood(args, Y, D, X, Z):
 
             contrib = (1.0 / float(sd)) * pdf_evals * (1.0 - cdf_evals)
 
-        contrib = np.clip(contrib, 1e-20, 1.0)
+        contrib = np.clip(contrib, 1e-20, None)
 
         likl += -np.log(contrib)
 

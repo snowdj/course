@@ -33,7 +33,7 @@ gp.simulate(init_dict)
 rslt = gp.estimate(init_dict)
 
 # Inspect result
-gp.inspect(init_dict, rslt)
+gp.inspect(rslt, init_dict)
 
 
 

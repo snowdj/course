@@ -37,7 +37,6 @@ def process():
 
         # Prepare container.
         if name not in dict_[keyword].keys():
-            dict_[keyword][name] = None
 
             if name in ['coeff']:
                 dict_[keyword][name] = []
