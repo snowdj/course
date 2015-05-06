@@ -36,10 +36,6 @@ Robin Weiss for the [*Research Computing Center*](https://rcc.uchicago.edu/)
 
 Steven Mohr for the [*Social Sciences Computing Services*](https://sscs.uchicago.edu/)
 
-### 05/06/15
-
-Felix Tintelnot on *TBD*
-
 ### 05/13/15
 
 Victor Zhorin for the [*Computation Institute*](https://www.ci.uchicago.edu/)
