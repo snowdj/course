@@ -12,9 +12,9 @@ from tools.user.processing import process
 
 def inspect(parameters, init_dict):
 
-    print init_dict
-    print '\n\n'
-    print parameters
+    print(init_dict)
+    print('\n\n')
+    print(parameters)
 
     print('inspection')
 
