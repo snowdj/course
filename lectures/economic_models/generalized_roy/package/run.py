@@ -51,8 +51,6 @@ for _ in range(NUM_TESTS):
     # Ensure same starting value
     init_dict['ESTIMATION']['start'] = 'init'
 
-    #init_dict['ESTIMATION']['maxiter'] = 1
-
     # Simulate sample
     gp.simulate(init_dict)
 
@@ -70,5 +68,3 @@ for _ in range(NUM_TESTS):
 
     # Cleanup
     os.remove(init_dict['BASICS']['file'])
-
-    #assert rslt['slow'] - 0.876761447444 < 0.00005
