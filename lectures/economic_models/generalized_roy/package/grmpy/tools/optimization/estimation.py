@@ -104,6 +104,9 @@ def _negative_log_likelihood(args, Y, D, X, Z):
 
     U1_var = args['TREATED']['var']
     U0_var = args['UNTREATED']['var']
+    V_var = args['COST']['var']
+
+    V_sd = np.sqrt(V_var)
 
     U1V_rho = args['RHO']['treated']
     U0V_rho = args['RHO']['untreated']
@@ -133,7 +136,8 @@ def _negative_log_likelihood(args, Y, D, X, Z):
             sd = np.sqrt(U0_var)
 
         arg_one = (Y[i] - np.dot(coeffs, X[i, :])) / sd
-        arg_two = (idx - rho * arg_one) / np.sqrt(1.0 - rho ** 2)
+        arg_two = (idx - rho * V_sd *arg_one) / np.sqrt((1.0 - rho ** 2) *
+                                                        V_var)
 
         cdf_evals = norm.cdf(arg_two)
         pdf_evals = norm.pdf(arg_one)
@@ -146,7 +150,7 @@ def _negative_log_likelihood(args, Y, D, X, Z):
 
             contrib = (1.0 / float(sd)) * pdf_evals * (1.0 - cdf_evals)
 
-        contrib = np.clip(contrib, 1e-20, None)
+        contrib = np.clip(contrib, 1e-20, np.inf)
 
         likl += -np.log(contrib)
 
