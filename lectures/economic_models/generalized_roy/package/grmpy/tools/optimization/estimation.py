@@ -28,10 +28,13 @@ def estimate(init_dict):
     maxiter = init_dict['ESTIMATION']['maxiter']
 
     optimizer = init_dict['ESTIMATION']['optimizer']
+    version = init_dict['ESTIMATION']['version']
+
+    var_V = init_dict['COST']['var']
 
     # Initialize different starting values
     x0 = _get_start(start, init_dict)
-
+    
     # Call alternative optimizers
     opts = dict()
 
@@ -46,16 +49,37 @@ def estimate(init_dict):
 
         optimizer = 'BFGS'
 
-    rslt = minimize(_max_interface, x0, args=(Y, D, X, Z),
+
+    if maxiter == 0:
+
+        # Auxiliary objects.
+        num_covars_out = X.shape[1]
+
+        # Collect maximization arguments.
+        rslt = _distribute_parameters(np.array(x0), num_covars_out)
+
+        # Calculate likelihood.
+        if version == 'slow':
+            likl = _slow_negative_log_likelihood(rslt, Y, D, X, Z, var_V)
+        elif version == 'fast':
+            likl = _fast_negative_log_likelihood(rslt, Y, D, X, Z, var_V)
+        else:
+            raise NotImplementedError
+
+    else:
+
+        opt_rslt = minimize(_max_interface, x0, args=(Y, D, X, Z, version, var_V),
                     method=optimizer, options=opts)
 
     # Tranformation to internal parameters
     num_covars_out = init_dict['AUX']['num_covars_out']
 
-    parameters = _distribute_parameters(rslt['x'], num_covars_out)
+    #rslt = _distribute_parameters(opt_rslt['x'], num_covars_out)
+
+    rslt['fval'] = 0.00#opt_rslt['fun']
 
     # Finishing
-    return parameters
+    return rslt
 
 
 ''' Auxiliary functions '''
@@ -93,7 +117,7 @@ def _distribute_parameters(x, num_covars_out):
     return rslt
 
 
-def _negative_log_likelihood(args, Y, D, X, Z):
+def _slow_negative_log_likelihood(args, Y, D, X, Z, var_V):
     """ Negative Log-likelihood function of the Generalized Roy Model.
     """
     # Distribute parametrization
@@ -104,9 +128,9 @@ def _negative_log_likelihood(args, Y, D, X, Z):
 
     U1_var = args['TREATED']['var']
     U0_var = args['UNTREATED']['var']
-    V_var = args['COST']['var']
 
-    V_sd = np.sqrt(V_var)
+
+    V_sd = np.sqrt(var_V)
 
     U1V_rho = args['RHO']['treated']
     U0V_rho = args['RHO']['untreated']
@@ -116,12 +140,14 @@ def _negative_log_likelihood(args, Y, D, X, Z):
     choice_coeffs = np.concatenate((Y1_coeffs - Y0_coeffs, - C_coeffs))
 
     # Likelihood construction.
-    likl = 0.00
+    likl = np.tile(np.nan, num_agents)
+
+    choice_idx = np.tile(np.nan, num_agents)
 
     for i in range(num_agents):
 
         G = np.concatenate((X[i, :], Z[i, :]))
-        idx = np.dot(choice_coeffs, G)
+        choice_idx[i] = np.dot(choice_coeffs, G)
 
         if D[i] == 1.00:
 
@@ -135,9 +161,12 @@ def _negative_log_likelihood(args, Y, D, X, Z):
             rho = U0V_rho
             sd = np.sqrt(U0_var)
 
+
+
         arg_one = (Y[i] - np.dot(coeffs, X[i, :])) / sd
-        arg_two = (idx - rho * V_sd *arg_one) / np.sqrt((1.0 - rho ** 2) *
-                                                        V_var)
+        arg_two = (choice_idx[i] - rho * V_sd *arg_one) / np.sqrt((1.0 - rho
+                                                                 ** 2) *
+                                                        var_V)
 
         cdf_evals = norm.cdf(arg_two)
         pdf_evals = norm.pdf(arg_one)
@@ -150,11 +179,76 @@ def _negative_log_likelihood(args, Y, D, X, Z):
 
             contrib = (1.0 / float(sd)) * pdf_evals * (1.0 - cdf_evals)
 
-        contrib = np.clip(contrib, 1e-20, np.inf)
+        likl[i] = contrib
 
-        likl += -np.log(contrib)
+    # Transformations.
+    likl = np.clip(likl, 1e-20, np.inf)
 
-    likl *= (1.0 / float(num_agents))
+    likl = -np.log(likl)
+
+    likl = likl.sum()
+
+    likl *= (1.0/float(num_agents))
+
+    print likl
+    # Quality checks.
+    assert (isinstance(likl, float))
+    assert (np.isfinite(likl))
+
+    # Finishing.
+    return likl
+
+
+def _fast_negative_log_likelihood(args, Y, D, X, Z, var_V):
+    """ Negative Log-likelihood function of the Generalized Roy Model.
+    """
+    # Distribute parametrization
+    Y1_coeffs = np.array(args['TREATED']['all'])
+    Y0_coeffs = np.array(args['UNTREATED']['all'])
+
+    C_coeffs = np.array(args['COST']['all'])
+
+    U1_var = args['TREATED']['var']
+    U0_var = args['UNTREATED']['var']
+
+    U1V_rho = args['RHO']['treated']
+    U0V_rho = args['RHO']['untreated']
+
+    U1_sd = np.sqrt(U1_var)
+    U0_sd = np.sqrt(U0_var)
+
+    sdV  = np.sqrt(var_V)
+
+    # Auxiliary objects.
+    num_agents = Y.shape[0]
+    choice_coeffs = np.concatenate((Y1_coeffs - Y0_coeffs, - C_coeffs))
+
+    # Likelihood construction.
+    G =  np.concatenate((X,Z), axis = 1)
+
+    choiceIndices = np.dot(choice_coeffs, G.T)
+
+    argOne = D*(Y - np.dot(Y1_coeffs, X.T))/U1_sd + \
+                (1 - D)*(Y - np.dot(Y0_coeffs, X.T))/U0_sd
+
+    argTwo = D*(choiceIndices - sdV*U1V_rho*argOne)/np.sqrt((1.0 - U1V_rho**2)*var_V) + \
+                (1 - D)*(choiceIndices - sdV*U0V_rho*argOne)/np.sqrt((1.0 -
+                                                                      U0V_rho**2)*var_V)
+
+    cdfEvals = norm.cdf(argTwo)
+    pdfEvals = norm.pdf(argOne)
+
+    likl = D*(1.0/U1_sd)*pdfEvals*cdfEvals + \
+                    (1 - D)*(1.0/U0_sd)*pdfEvals*(1.0  - cdfEvals)
+
+    # Transformations.
+    likl = np.clip(likl, 1e-20, np.inf)
+
+    likl = -np.log(likl)
+
+    likl = likl.sum()
+
+    likl *= (1.0/float(num_agents))
 
     # Quality checks.
     assert (isinstance(likl, float))
@@ -185,7 +279,7 @@ def _load_data():
     return Y, D, X, Z
 
 
-def _max_interface(x, Y, D, X, Z):
+def _max_interface(x, Y, D, X, Z, version, var_V):
     """ Interface to the SciPy maximization routines.
     """
     # Auxiliary objects.
@@ -195,7 +289,12 @@ def _max_interface(x, Y, D, X, Z):
     rslt = _distribute_parameters(x, num_covars_out)
 
     # Calculate likelihood.
-    likl = _negative_log_likelihood(rslt, Y, D, X, Z)
+    if version == 'slow':
+        likl = _slow_negative_log_likelihood(rslt, Y, D, X, Z, var_V)
+    elif version == 'fast':
+        likl = _fast_negative_log_likelihood(rslt, Y, D, X, Z, var_V)
+    else:
+        raise NotImplementedError
 
     # Finishing.
     return likl

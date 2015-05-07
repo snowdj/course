@@ -88,8 +88,8 @@ def _check_integrity_process(dict_):
     assert (dict_['ESTIMATION']['maxiter'] >= 0)
 
     # Implementations
-    assert (dict_['ESTIMATION']['version'] in ['functional', 'object', 'optimized'])
-    assert (dict_['ESTIMATION']['version'] in ['functional'])
+    assert (dict_['ESTIMATION']['version'] in ['fast', 'slow', 'object'])
+    assert (dict_['ESTIMATION']['version'] in ['fast', 'slow'])
 
     # Finishing
     return True
