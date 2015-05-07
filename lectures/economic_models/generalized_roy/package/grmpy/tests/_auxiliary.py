@@ -16,6 +16,9 @@ MAX_MAXITER = 0
 MAX_NUM_COVARS_OUT = 5
 MAX_NUM_COVARS_COST = 5
 
+''' Main function '''
+
+
 def random_init():
     """ This function simulated a random initialization file.
 

@@ -7,9 +7,6 @@ import numpy as np
 from scipy.stats import norm
 from scipy.optimize import minimize
 
-# project library
-from tools.user.processing import process
-
 ''' Main function '''
 
 
@@ -35,7 +32,7 @@ def estimate(init_dict):
 
     # Initialize different starting values
     x0 = _get_start(start, init_dict)
-    
+
     # Call alternative optimizers
     opts = dict()
 
@@ -50,7 +47,6 @@ def estimate(init_dict):
 
         optimizer = 'BFGS'
 
-
     if maxiter == 0:
 
         # Auxiliary objects.
@@ -59,28 +55,24 @@ def estimate(init_dict):
         # Collect maximization arguments.
         rslt = _distribute_parameters(np.array(x0), num_covars_out)
 
-        # Calculate likelihood.
-        if version == 'slow':
-            likl = _slow_negative_log_likelihood(rslt, Y, D, X, Z, var_V)
-        elif version == 'fast':
-            likl = _fast_negative_log_likelihood(rslt, Y, D, X, Z, var_V)
-        else:
-            raise NotImplementedError
+        # Calculate likelihood according to user's request
+        likl = _negative_log_likelihood(rslt, Y, D, X, Z, var_V, version)
 
         # Construct results
-        rslt = _distribute_parameters(x0, num_covars_out)
-
-        rslt['fval'] = likl
+        x_rslt, fun = x0, likl
 
     else:
+        opt_rslt = minimize(_max_interface, x0,
+                            args=(Y, D, X, Z, version, var_V),
+                            method=optimizer, options=opts)
 
-        opt_rslt = minimize(_max_interface, x0, args=(Y, D, X, Z, version, var_V),
-                    method=optimizer, options=opts)
+        # Construct results
+        x_rslt, fun = opt_rslt['x'], opt_rslt['fun']
 
-        # Tranformation to internal parameters
-        rslt = _distribute_parameters(opt_rslt['x'], num_covars_out)
+    # Tranformation to internal parameters
+    rslt = _distribute_parameters(x_rslt, num_covars_out)
 
-        rslt['fval'] = opt_rslt['fun']
+    rslt['fval'] = fun
 
     # Finishing
     return rslt
@@ -121,6 +113,40 @@ def _distribute_parameters(x, num_covars_out):
     return rslt
 
 
+def _max_interface(x, Y, D, X, Z, version, var_V):
+    """ Interface to the SciPy maximization routines.
+    """
+    # Auxiliary objects.
+    num_covars_out = X.shape[1]
+
+    # Collect maximization arguments.
+    rslt = _distribute_parameters(x, num_covars_out)
+
+    # Calculate likelihood.
+    likl = _negative_log_likelihood(rslt, Y, D, X, Z, var_V, version)
+
+    # Finishing.
+    return likl
+
+
+def _negative_log_likelihood(args, Y, D, X, Z, var_V, version):
+    """ Negative log-likelihood evaluation.
+    """
+
+    # Select version
+    if version == 'slow':
+        likl = _slow_negative_log_likelihood(args, Y, D, X, Z, var_V)
+    elif version == 'fast':
+        likl = _fast_negative_log_likelihood(args, Y, D, X, Z, var_V)
+    elif version == 'object':
+        raise NotImplementedError
+    else:
+        raise AssertionError
+
+    # Finishing
+    return likl
+
+
 def _slow_negative_log_likelihood(args, Y, D, X, Z, var_V):
     """ Negative Log-likelihood function of the Generalized Roy Model.
     """
@@ -132,7 +158,6 @@ def _slow_negative_log_likelihood(args, Y, D, X, Z, var_V):
 
     U1_var = args['TREATED']['var']
     U0_var = args['UNTREATED']['var']
-
 
     V_sd = np.sqrt(var_V)
 
@@ -165,12 +190,10 @@ def _slow_negative_log_likelihood(args, Y, D, X, Z, var_V):
             rho = U0V_rho
             sd = np.sqrt(U0_var)
 
-
-
         arg_one = (Y[i] - np.dot(coeffs, X[i, :])) / sd
-        arg_two = (choice_idx[i] - rho * V_sd *arg_one) / np.sqrt((1.0 - rho
-                                                                 ** 2) *
-                                                        var_V)
+        arg_two = (choice_idx[i] - rho * V_sd * arg_one) / np.sqrt((1.0 - rho
+                                                                    ** 2) *
+                                                                   var_V)
 
         cdf_evals = norm.cdf(arg_two)
         pdf_evals = norm.pdf(arg_one)
@@ -192,7 +215,7 @@ def _slow_negative_log_likelihood(args, Y, D, X, Z, var_V):
 
     likl = likl.sum()
 
-    likl *= (1.0/float(num_agents))
+    likl *= (1.0 / float(num_agents))
 
     # Quality checks.
     assert (isinstance(likl, float))
@@ -220,30 +243,31 @@ def _fast_negative_log_likelihood(args, Y, D, X, Z, var_V):
     U1_sd = np.sqrt(U1_var)
     U0_sd = np.sqrt(U0_var)
 
-    sdV  = np.sqrt(var_V)
+    sdV = np.sqrt(var_V)
 
     # Auxiliary objects.
     num_agents = Y.shape[0]
     choice_coeffs = np.concatenate((Y1_coeffs - Y0_coeffs, - C_coeffs))
 
     # Likelihood construction.
-    G =  np.concatenate((X,Z), axis = 1)
+    G = np.concatenate((X, Z), axis=1)
 
     choiceIndices = np.dot(choice_coeffs, G.T)
 
-    argOne = D*(Y - np.dot(Y1_coeffs, X.T))/U1_sd + \
-                (1 - D)*(Y - np.dot(Y0_coeffs, X.T))/U0_sd
+    argOne = D * (Y - np.dot(Y1_coeffs, X.T)) / U1_sd + \
+             (1 - D) * (Y - np.dot(Y0_coeffs, X.T)) / U0_sd
 
-    argTwo = D*(choiceIndices - sdV*U1V_rho*argOne)/np.sqrt((1.0 - U1V_rho**2)*var_V) + \
-                (1 - D)*(choiceIndices - sdV*U0V_rho*argOne)/np.sqrt((1.0 -
-                                                                      U0V_rho**2)*var_V)
+    argTwo = D * (choiceIndices - sdV * U1V_rho * argOne) / np.sqrt(
+        (1.0 - U1V_rho ** 2) * var_V) + \
+             (1 - D) * (choiceIndices - sdV * U0V_rho * argOne) / np.sqrt(
+                 (1.0 -
+                  U0V_rho ** 2) * var_V)
 
     cdfEvals = norm.cdf(argTwo)
     pdfEvals = norm.pdf(argOne)
 
-
-    likl = D*(1.0/U1_sd)*pdfEvals*cdfEvals + \
-                    (1 - D)*(1.0/U0_sd)*pdfEvals*(1.0  - cdfEvals)
+    likl = D * (1.0 / U1_sd) * pdfEvals * cdfEvals + \
+           (1 - D) * (1.0 / U0_sd) * pdfEvals * (1.0 - cdfEvals)
 
     # Transformations.
     likl = np.clip(likl, 1e-20, np.inf)
@@ -252,7 +276,7 @@ def _fast_negative_log_likelihood(args, Y, D, X, Z, var_V):
 
     likl = likl.sum()
 
-    likl *= (1.0/float(num_agents))
+    likl *= (1.0 / float(num_agents))
 
     # Quality checks.
     assert (isinstance(likl, float))
@@ -284,27 +308,6 @@ def _load_data(init_dict):
 
     # Finishing
     return Y, D, X, Z
-
-
-def _max_interface(x, Y, D, X, Z, version, var_V):
-    """ Interface to the SciPy maximization routines.
-    """
-    # Auxiliary objects.
-    num_covars_out = X.shape[1]
-
-    # Collect maximization arguments.
-    rslt = _distribute_parameters(x, num_covars_out)
-
-    # Calculate likelihood.
-    if version == 'slow':
-        likl = _slow_negative_log_likelihood(rslt, Y, D, X, Z, var_V)
-    elif version == 'fast':
-        likl = _fast_negative_log_likelihood(rslt, Y, D, X, Z, var_V)
-    else:
-        raise NotImplementedError
-
-    # Finishing.
-    return likl
 
 
 def _get_start(which, init_dict):
@@ -358,11 +361,11 @@ def _transform_start(x):
     x[(-3)] = np.log(x[(-3)])
 
     # Correlations
-    transform = (x[(-2)] + 1)/2
-    x[(-2)] = np.log(transform/(1.0 - transform))
+    transform = (x[(-2)] + 1) / 2
+    x[(-2)] = np.log(transform / (1.0 - transform))
 
-    transform = (x[(-1)] + 1)/2
-    x[(-1)] = np.log(transform/(1.0 - transform))
+    transform = (x[(-1)] + 1) / 2
+    x[(-1)] = np.log(transform / (1.0 - transform))
 
     # Finishing
     return x
