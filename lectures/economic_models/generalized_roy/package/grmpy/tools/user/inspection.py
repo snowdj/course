@@ -24,6 +24,9 @@ def inspect(rslt, init_dict):
 
     for key_ in rslt.keys():
 
+        if key_ in ['fval']:
+            continue
+
         for subkey in rslt[key_].keys():
 
             modified_init[key_][subkey] = rslt[key_][subkey]

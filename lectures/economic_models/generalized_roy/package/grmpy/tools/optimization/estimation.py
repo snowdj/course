@@ -21,7 +21,7 @@ def estimate(init_dict):
     assert (isinstance(init_dict, dict))
 
     # Load dataset
-    Y, D, X, Z = _load_data()
+    Y, D, X, Z = _load_data(init_dict)
 
     # Create auxiliary objects
     start = init_dict['ESTIMATION']['start']
@@ -29,6 +29,7 @@ def estimate(init_dict):
 
     optimizer = init_dict['ESTIMATION']['optimizer']
     version = init_dict['ESTIMATION']['version']
+    num_covars_out = init_dict['AUX']['num_covars_out']
 
     var_V = init_dict['COST']['var']
 
@@ -66,17 +67,20 @@ def estimate(init_dict):
         else:
             raise NotImplementedError
 
+        # Construct results
+        rslt = _distribute_parameters(x0, num_covars_out)
+
+        rslt['fval'] = likl
+
     else:
 
         opt_rslt = minimize(_max_interface, x0, args=(Y, D, X, Z, version, var_V),
                     method=optimizer, options=opts)
 
-    # Tranformation to internal parameters
-    num_covars_out = init_dict['AUX']['num_covars_out']
+        # Tranformation to internal parameters
+        rslt = _distribute_parameters(opt_rslt['x'], num_covars_out)
 
-    #rslt = _distribute_parameters(opt_rslt['x'], num_covars_out)
-
-    rslt['fval'] = 0.00#opt_rslt['fun']
+        rslt['fval'] = opt_rslt['fun']
 
     # Finishing
     return rslt
@@ -190,7 +194,6 @@ def _slow_negative_log_likelihood(args, Y, D, X, Z, var_V):
 
     likl *= (1.0/float(num_agents))
 
-    print likl
     # Quality checks.
     assert (isinstance(likl, float))
     assert (np.isfinite(likl))
@@ -238,6 +241,7 @@ def _fast_negative_log_likelihood(args, Y, D, X, Z, var_V):
     cdfEvals = norm.cdf(argTwo)
     pdfEvals = norm.pdf(argOne)
 
+
     likl = D*(1.0/U1_sd)*pdfEvals*cdfEvals + \
                     (1 - D)*(1.0/U0_sd)*pdfEvals*(1.0  - cdfEvals)
 
@@ -258,17 +262,20 @@ def _fast_negative_log_likelihood(args, Y, D, X, Z, var_V):
     return likl
 
 
-def _load_data():
+def _load_data(init_dict):
     """ Load dataset.
     """
-    init_dict = process()
-
     # Auxiliary objects
     num_covars_out = init_dict['AUX']['num_covars_out']
     num_covars_cost = init_dict['AUX']['num_covars_cost']
 
     # Read dataset
     data = np.genfromtxt(init_dict['BASICS']['file'])
+
+    # Reshaping, this ensure that the program also runs with just one agent
+    # as otherwise only an vector is created. This creates problems for the
+    # subsetting of the overall data into the components.
+    data = np.array(data, ndmin=2)
 
     # Distribute data
     Y, D = data[:, 0], data[:, 1]
@@ -318,8 +325,8 @@ def _get_start(which, init_dict):
         x0[(-3)] = max(x0[(-3)], 0.01)
 
         # Correlations
-        x0[(-2)] -= - 0.5
-        x0[(-1)] -= - 0.5
+        x0[(-2)] -= 0.5
+        x0[(-1)] -= 0.5
 
     elif which == 'init':
         x0 = init_dict['AUX']['start_values'][:]
@@ -328,6 +335,9 @@ def _get_start(which, init_dict):
 
     # Transform to real line
     x0 = _transform_start(x0)
+
+    # Type conversion
+    x0 = np.array(x0)
 
     # Quality assurance.
     assert (np.all(np.isfinite(x0)))
@@ -348,8 +358,11 @@ def _transform_start(x):
     x[(-3)] = np.log(x[(-3)])
 
     # Correlations
-    x[(-2)] = -np.log(-1.0 + 2.0/(x[(-2) + 1]))
-    x[(-1)] = -np.log(-1.0 + 2.0/(x[(-1) + 1]))
+    transform = (x[(-2)] + 1)/2
+    x[(-2)] = np.log(transform/(1.0 - transform))
+
+    transform = (x[(-1)] + 1)/2
+    x[(-1)] = np.log(transform/(1.0 - transform))
 
     # Finishing
     return x

@@ -10,13 +10,14 @@ import numpy as np
 ''' Main function '''
 
 
-def process():
+def process(file_):
     """ This function reads the init.ini file.
     """
+
     # Initialization
     dict_ = {}
 
-    for line in open('init.ini').readlines():
+    for line in open(file_).readlines():
 
         list_ = shlex.split(line)
 
