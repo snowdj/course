@@ -28,8 +28,6 @@ def estimate(init_dict):
     version = init_dict['ESTIMATION']['version']
     num_covars_out = init_dict['AUX']['num_covars_out']
 
-    var_V = init_dict['COST']['var']
-
     # Initialize different starting values
     x0 = _get_start(start, init_dict)
 
@@ -111,6 +109,15 @@ def _distribute_parameters(x, init_dict, num_covars_out):
 
     rslt['RHO']['treated'] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-2])))
     rslt['RHO']['untreated'] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-1])))
+
+    # Update auxiliary versions
+    rslt['AUX'] = dict()
+
+    rslt['AUX']['x_internal'] = x.copy()
+    rslt['AUX']['x_internal'][-4] = np.exp(x[(-4)])
+    rslt['AUX']['x_internal'][-3] = np.exp(x[(-3)])
+    rslt['AUX']['x_internal'][-2] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-2])))
+    rslt['AUX']['x_internal'][-1] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-1])))
 
     # Finishing.
     return rslt
@@ -314,9 +321,12 @@ def _get_start(which, init_dict):
         x0[(-1)] -= 0.5
 
     elif which == 'init':
-        x0 = init_dict['AUX']['start_values'][:]
+        x0 = init_dict['AUX']['init_values'][:]
     else:
         raise AssertionError
+
+    # Document starting values
+    init_dict['AUX']['start_values'] = x0.copy()
 
     # Transform to real line
     x0 = _transform_start(x0)

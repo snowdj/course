@@ -46,17 +46,36 @@ def inspect(rslt, init_dict):
     effects += [np.mean(B[D == 0])]
 
     # Print selected results to file
-    fmt = '     {0:<5}{1:10.2f}\n\n'
+
 
     with open('results.txt', 'w') as file_:
 
         file_.write('\n softEcon: Generalized Roy Model')
         file_.write('\n -------------------------------\n')
 
+        # Average effects of treatment
+        fmt = '     {0:<5}{1:10.2f}\n\n'
+
         file_.write('\n Average Treatment Effects\n\n')
 
         for i, label in enumerate(['ATE', 'TT', 'TUT']):
 
             str_ = fmt.format(label, effects[i])
+
+            file_.write(str_)
+
+        file_.write('\n Parameters\n\n')
+        file_.write('     Start    Finish\n\n')
+
+        num_paras = init_dict['AUX']['num_paras']
+
+        # Structural parameters
+        x0, x = init_dict['AUX']['start_values'], rslt['AUX']['x_internal']
+
+        fmt = '{0:10.2f}{1:10.2f}\n'
+
+        for i in range(num_paras):
+
+            str_ = fmt.format(x0[i], x[i])
 
             file_.write(str_)

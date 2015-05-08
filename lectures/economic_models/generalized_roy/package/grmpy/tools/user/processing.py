@@ -127,16 +127,16 @@ def _add_auxiliary(dict_):
     dict_['AUX']['num_paras'] = 2 * num_covars_out + num_covars_cost + 2 + 2
 
     # Starting values
-    dict_['AUX']['start_values'] = []
-    dict_['AUX']['start_values'] += [dict_['TREATED']['int']]
-    dict_['AUX']['start_values'] += dict_['TREATED']['coeff']
-    dict_['AUX']['start_values'] += [dict_['UNTREATED']['int']]
-    dict_['AUX']['start_values'] += dict_['UNTREATED']['coeff']
-    dict_['AUX']['start_values'] += dict_['COST']['coeff']
-    dict_['AUX']['start_values'] += [dict_['TREATED']['var']]
-    dict_['AUX']['start_values'] += [dict_['UNTREATED']['var']]
-    dict_['AUX']['start_values'] += [dict_['RHO']['treated']]
-    dict_['AUX']['start_values'] += [dict_['RHO']['untreated']]
+    dict_['AUX']['init_values'] = []
+    dict_['AUX']['init_values'] += [dict_['TREATED']['int']]
+    dict_['AUX']['init_values'] += dict_['TREATED']['coeff']
+    dict_['AUX']['init_values'] += [dict_['UNTREATED']['int']]
+    dict_['AUX']['init_values'] += dict_['UNTREATED']['coeff']
+    dict_['AUX']['init_values'] += dict_['COST']['coeff']
+    dict_['AUX']['init_values'] += [dict_['TREATED']['var']]
+    dict_['AUX']['init_values'] += [dict_['UNTREATED']['var']]
+    dict_['AUX']['init_values'] += [dict_['RHO']['treated']]
+    dict_['AUX']['init_values'] += [dict_['RHO']['untreated']]
 
     # Finishing
     return dict_
