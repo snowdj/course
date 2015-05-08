@@ -24,47 +24,64 @@ from tests._auxiliary import random_init
 
 import grmpy as gp
 
-''' Calling the function of the library '''
+''' Calling the functions of the package '''
+if False:
 
-# Process initialization file
-init_dict = gp.process('init.ini')
+    # Process initialization file
+    init_dict = gp.process('init.ini')
 
-# Simulate synthetic sample
-gp.simulate(init_dict)
+    # Simulate synthetic sample
+    gp.simulate(init_dict)
 
-# Estimate model
-rslt = gp.estimate(init_dict)
+    # Estimate model
+    rslt = gp.estimate(init_dict)
 
-# Inspect results
-gp.inspect(rslt, init_dict)
+    # Inspect results
+    gp.inspect(rslt, init_dict)
 
 
 ''' Testing the alternative implementations of the likelihood function '''
+if False:
 
-NUM_TESTS = 1
+    NUM_TESTS = 1
 
-for _ in range(NUM_TESTS):
+    for _ in range(NUM_TESTS):
 
-    # Generate random request
-    init_dict = random_init()
+        # Generate random request
+        init_dict = random_init()
 
-    # Ensure same starting value
-    init_dict['ESTIMATION']['start'] = 'init'
+        # Ensure same starting value
+        init_dict['ESTIMATION']['start'] = 'init'
 
-    # Simulate sample
+        # Simulate sample
+        gp.simulate(init_dict)
+
+        # Estimate generalize Roy model
+        rslt = dict()
+
+        for version in ['slow', 'fast']:
+
+            init_dict['ESTIMATION']['version'] = version
+
+            rslt[version] = gp.estimate(init_dict)['fval']
+
+        # Assert equality of results
+        np.testing.assert_allclose(rslt['slow'], rslt['fast'])
+
+        # Cleanup
+        os.remove(init_dict['BASICS']['file'])
+
+''' Testing reliability of the implementation '''
+if True:
+
+    # Process initialization file
+    init_dict = gp.process('init.ini')
+
+    # Simulate synthetic sample
     gp.simulate(init_dict)
 
-    # Estimate generalize Roy model
-    rslt = dict()
+    # Estimate model
+    rslt = gp.estimate(init_dict)
 
-    for version in ['slow', 'fast']:
-
-        init_dict['ESTIMATION']['version'] = version
-
-        rslt[version] = gp.estimate(init_dict)['fval']
-
-    # Assert equality of results
-    np.testing.assert_allclose(rslt['slow'], rslt['fast'])
-
-    # Cleanup
-    os.remove(init_dict['BASICS']['file'])
+    # Inspect results
+    gp.inspect(rslt, init_dict)
