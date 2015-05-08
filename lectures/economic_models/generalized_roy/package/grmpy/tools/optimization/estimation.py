@@ -62,8 +62,9 @@ def estimate(init_dict):
         x_rslt, fun = x0, likl
 
     else:
+
         opt_rslt = minimize(_max_interface, x0,
-                            args=(Y, D, X, Z, version, var_V),
+                            args=(Y, D, X, Z, version, init_dict),
                             method=optimizer, options=opts)
 
         # Construct results
@@ -155,70 +156,56 @@ def _slow_negative_log_likelihood(args, Y, D, X, Z):
     # Distribute parametrization
     Y1_coeffs = np.array(args['TREATED']['all'])
     Y0_coeffs = np.array(args['UNTREATED']['all'])
-
     C_coeffs = np.array(args['COST']['all'])
 
     U1_var = args['TREATED']['var']
     U0_var = args['UNTREATED']['var']
 
     var_V = args['COST']['var']
-    V_sd = np.sqrt(var_V)
 
     U1V_rho = args['RHO']['treated']
     U0V_rho = args['RHO']['untreated']
 
     # Auxiliary objects.
+    U1_sd = np.sqrt(U1_var)
+    U0_sd = np.sqrt(U0_var)
+    V_sd = np.sqrt(var_V)
+
     num_agents = Y.shape[0]
     choice_coeffs = np.concatenate((Y1_coeffs - Y0_coeffs, - C_coeffs))
 
-    # Likelihood construction.
+    # Initialize containers
     likl = np.tile(np.nan, num_agents)
-
     choice_idx = np.tile(np.nan, num_agents)
 
+    # Likelihood construction.
     for i in range(num_agents):
 
         G = np.concatenate((X[i, :], Z[i, :]))
         choice_idx[i] = np.dot(choice_coeffs, G)
 
+        # Select outcome infromation
         if D[i] == 1.00:
 
-            coeffs = Y1_coeffs
-            rho = U1V_rho
-            sd = np.sqrt(U1_var)
-
+            coeffs, rho, sd = Y1_coeffs, U1V_rho, U1_sd
         else:
-
-            coeffs = Y0_coeffs
-            rho = U0V_rho
-            sd = np.sqrt(U0_var)
+            coeffs, rho, sd = Y0_coeffs, U0V_rho, U0_sd
 
         arg_one = (Y[i] - np.dot(coeffs, X[i, :])) / sd
-        arg_two = (choice_idx[i] - rho * V_sd * arg_one) / np.sqrt((1.0 - rho
-                                                                    ** 2) *
-                                                                   var_V)
+        arg_two = (choice_idx[i] - rho * V_sd * arg_one) / \
+                  np.sqrt((1.0 - rho ** 2) * var_V)
 
-        cdf_evals = norm.cdf(arg_two)
-        pdf_evals = norm.pdf(arg_one)
+        pdf_evals, cdf_evals = norm.pdf(arg_one), norm.cdf(arg_two)
 
         if D[i] == 1.0:
-
             contrib = (1.0 / float(sd)) * pdf_evals * cdf_evals
-
         else:
-
             contrib = (1.0 / float(sd)) * pdf_evals * (1.0 - cdf_evals)
 
         likl[i] = contrib
 
     # Transformations.
-    likl = np.clip(likl, 1e-20, np.inf)
-
-    likl = -np.log(likl)
-
-    likl = likl.sum()
-
-    likl *= (1.0 / float(num_agents))
+    likl = -np.mean(np.log(np.clip(likl, 1e-20, np.inf)))
 
     # Quality checks.
     assert (isinstance(likl, float))
@@ -242,13 +229,12 @@ def _fast_negative_log_likelihood(args, Y, D, X, Z):
 
     U1V_rho = args['RHO']['treated']
     U0V_rho = args['RHO']['untreated']
+    V_var = args['COST']['var']
 
     U1_sd = np.sqrt(U1_var)
     U0_sd = np.sqrt(U0_var)
+    V_sd = np.sqrt(V_var)
 
-    sdV = np.sqrt(args['COST']['var'])
-
-    var_V = args['COST']['var']
     # Auxiliary objects.
     num_agents = Y.shape[0]
     choice_coeffs = np.concatenate((Y1_coeffs - Y0_coeffs, - C_coeffs))
@@ -256,31 +242,23 @@ def _fast_negative_log_likelihood(args, Y, D, X, Z):
     # Likelihood construction.
     G = np.concatenate((X, Z), axis=1)
 
-    choiceIndices = np.dot(choice_coeffs, G.T)
+    choice_idx = np.dot(choice_coeffs, G.T)
 
-    argOne = D * (Y - np.dot(Y1_coeffs, X.T)) / U1_sd + \
+    arg_one = D * (Y - np.dot(Y1_coeffs, X.T)) / U1_sd + \
              (1 - D) * (Y - np.dot(Y0_coeffs, X.T)) / U0_sd
 
-    argTwo = D * (choiceIndices - sdV * U1V_rho * argOne) / np.sqrt(
-        (1.0 - U1V_rho ** 2) * var_V) + \
-             (1 - D) * (choiceIndices - sdV * U0V_rho * argOne) / np.sqrt(
-                 (1.0 -
-                  U0V_rho ** 2) * var_V)
+    arg_two = D * (choice_idx - V_sd * U1V_rho * arg_one) / np.sqrt(
+        (1.0 - U1V_rho ** 2) * V_var) + \
+        (1 - D) * (choice_idx - V_sd * U0V_rho * arg_one) / np.sqrt(
+                 (1.0 - U0V_rho ** 2) * V_var)
 
-    cdfEvals = norm.cdf(argTwo)
-    pdfEvals = norm.pdf(argOne)
+    pdf_evals, cdf_evals = norm.pdf(arg_one), norm.cdf(arg_two)
 
-    likl = D * (1.0 / U1_sd) * pdfEvals * cdfEvals + \
-           (1 - D) * (1.0 / U0_sd) * pdfEvals * (1.0 - cdfEvals)
+    likl = D * (1.0 / U1_sd) * pdf_evals * cdf_evals + \
+           (1 - D) * (1.0 / U0_sd) * pdf_evals * (1.0 - cdf_evals)
 
     # Transformations.
-    likl = np.clip(likl, 1e-20, np.inf)
-
-    likl = -np.log(likl)
-
-    likl = likl.sum()
-
-    likl *= (1.0 / float(num_agents))
+    likl = -np.mean(np.log(np.clip(likl, 1e-20, np.inf)))
 
     # Quality checks.
     assert (isinstance(likl, float))
