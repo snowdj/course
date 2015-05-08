@@ -321,7 +321,7 @@ def _get_start(which, init_dict):
         x0[(-1)] -= 0.5
 
     elif which == 'init':
-        x0 = init_dict['AUX']['init_values'][:]
+        x0 = np.array(init_dict['AUX']['init_values'][:])
     else:
         raise AssertionError
 
