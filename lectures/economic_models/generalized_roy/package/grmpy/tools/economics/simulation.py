@@ -2,12 +2,10 @@
     a synthetic dataset from the generalized Roy model.
 """
 
-# standard libraries
+# standard library
 import numpy as np
 import os
 
-# project library
-from tools.user.processing import process
 
 ''' Main function '''
 
@@ -106,7 +104,7 @@ def simulate(init_dict, unobserved=False):
         # Collect data matrices
         Y[i], Y0[i], Y1[i], D[i] = y, y1, y0, d
 
-    # Check integrity
+    # Check integrity of simulated data
     _check_integrity_simulate(Y1, Y0, Y, D)
 
     # Save to disk
@@ -117,7 +115,9 @@ def simulate(init_dict, unobserved=False):
 
 
 ''' Auxiliary functions '''
-
+# Note that the name of all auxiliary functions starts with an underscore.
+# This ensures that the function is private to the module. A standard import
+# of this module will not make this function available.
 
 def _check_integrity_simulate(Y1, Y0, Y, D):
     """ Check quality of simulated sample.
@@ -137,8 +137,7 @@ def _check_integrity_simulate(Y1, Y0, Y, D):
     assert (D.all() in [1.0, 0.0])
 
 
-def _write_out(Y, D, X, Z, file_name, unobserved=False, Y1=None,
-               Y0=None):
+def _write_out(Y, D, X, Z, file_name, unobserved=False, Y1=None, Y0=None):
     """ Write out simulated data to file.
     """
 

@@ -1,5 +1,5 @@
 """ This module serves as the interface to the basic functions of the
-    library.
+    grmpy package.
 """
 
 # Interfaces

@@ -11,9 +11,8 @@ from scipy.optimize import minimize
 
 
 def estimate(init_dict):
-    """ Estimate the generalized Roy model.
+    """ Estimate our version of the generalized Roy model.
     """
-
     # Antibugging
     assert (isinstance(init_dict, dict))
 
@@ -31,11 +30,6 @@ def estimate(init_dict):
     # Initialize different starting values
     x0 = _get_start(start, init_dict)
 
-    # Call alternative optimizers
-    opts = dict()
-
-    opts['maxiter'] = maxiter
-
     # Select optimizer
     if optimizer == 'nm':
 
@@ -45,6 +39,12 @@ def estimate(init_dict):
 
         optimizer = 'BFGS'
 
+    # Provide additional arguments to the optimizer
+    opts = dict()
+
+    opts['maxiter'] = maxiter
+
+    # Run optimization or just evaluate function at starting values
     if maxiter == 0:
 
         # Auxiliary objects.
@@ -56,29 +56,36 @@ def estimate(init_dict):
         # Calculate likelihood according to user's request
         likl = _negative_log_likelihood(rslt, Y, D, X, Z, version)
 
-        # Construct results
-        x_rslt, fun = x0, likl
+        # Compile results
+        x_rslt, fun, success = x0, likl, False
 
     else:
 
+        # Check out the SciPy documentation for details about the interface
+        # to the `minimize' function that provides a convenient interface to
+        #  a variety of alternative maximization algorithms. You will also
+        # find information about the return information.
         opt_rslt = minimize(_max_interface, x0,
                             args=(Y, D, X, Z, version, init_dict),
                             method=optimizer, options=opts)
 
-        # Construct results
+        # Compile results
         x_rslt, fun = opt_rslt['x'], opt_rslt['fun']
+        success = opt_rslt['success']
 
     # Tranformation to internal parameters
     rslt = _distribute_parameters(x_rslt, init_dict, num_covars_out)
 
-    rslt['fval'] = fun
+    rslt['fval'], rslt['success'] = fun, success
 
     # Finishing
     return rslt
 
 
 ''' Auxiliary functions '''
-
+# Note that the name of all auxiliary functions starts with an underscore.
+# This ensures that the function is private to the module. A standard import
+# of this module will not make this function available.
 
 def _distribute_parameters(x, init_dict, num_covars_out):
     """ Distribute the parameters.
@@ -191,7 +198,7 @@ def _slow_negative_log_likelihood(args, Y, D, X, Z):
         G = np.concatenate((X[i, :], Z[i, :]))
         choice_idx[i] = np.dot(choice_coeffs, G)
 
-        # Select outcome infromation
+        # Select outcome information
         if D[i] == 1.00:
 
             coeffs, rho, sd = Y1_coeffs, U1V_rho, U1_sd

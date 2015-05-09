@@ -67,7 +67,9 @@ def process(file_):
 
 
 ''' Auxiliary functions '''
-
+# Note that the name of all auxiliary functions starts with an underscore.
+# This ensures that the function is private to the module. A standard import
+# of this module will not make this function available.
 
 def _check_integrity_process(dict_):
     """ Check integrity of initFile dict.

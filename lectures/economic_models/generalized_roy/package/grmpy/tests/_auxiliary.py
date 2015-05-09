@@ -9,10 +9,13 @@ import numpy as np
 
 # project library
 from tools.user.processing import _add_auxiliary
+# Note that I need to explicitly import _add_auxiliary. As it is a function
+# private to the processing module, a standard import of the module is not
+# sufficient.
 
 # Module-wide variables
 MAX_AGENTS = 1000
-MAX_MAXITER = 0
+MAX_MAXITER = 100
 MAX_NUM_COVARS_OUT = 5
 MAX_NUM_COVARS_COST = 5
 
@@ -20,17 +23,16 @@ MAX_NUM_COVARS_COST = 5
 
 
 def random_init(seed=None):
-    """ This function simulated a random initialization file.
-
-        This function already imposes that I have at least one covariate in X
-        and Z, and also an intercept is defined.
-        
+    """ This function simulated a dictionary version of a random
+        initialization file. This function already imposes that we have at
+        least one covariate in X and Z, and also an intercept is defined.
     """
 
     # Set random seed
     if seed is not None:
-        np.random.seed(seed )
+        np.random.seed(seed)
 
+    # Initialize container
     init_dict = dict()
 
     # Basics
@@ -50,9 +52,9 @@ def random_init(seed=None):
     init_dict['ESTIMATION'] = dict()
     init_dict['ESTIMATION']['optimizer'] = np.random.choice(['bfgs', 'nm'])
     init_dict['ESTIMATION']['start'] = np.random.choice(['random', 'init'])
-    init_dict['ESTIMATION']['maxiter'] = np.random.random_integers(0,
-                                                                  MAX_MAXITER)
     init_dict['ESTIMATION']['version'] = np.random.choice(['slow', 'fast'])
+    init_dict['ESTIMATION']['maxiter'] = \
+        np.random.random_integers(0, MAX_MAXITER)
 
     # Model
     num_coeffs_out = np.random.random_integers(1, MAX_NUM_COVARS_OUT)
@@ -81,6 +83,9 @@ def random_init(seed=None):
     return init_dict
 
 ''' Auxiliary functions '''
+# Note that the name of all auxiliary functions starts with an underscore.
+# This ensures that the function is private to the module. A standard import
+# of this module will not make this function available.
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 

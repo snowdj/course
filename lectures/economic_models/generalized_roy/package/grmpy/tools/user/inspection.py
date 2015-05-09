@@ -20,13 +20,12 @@ def inspect(rslt, init_dict):
     assert (isinstance(rslt, dict))
     assert (isinstance(init_dict, dict))
 
-    # Update parameters
+    # Update results
     modified_init = copy.deepcopy(init_dict)
-
 
     for key_ in rslt.keys():
 
-        if key_ in ['fval']:
+        if key_ in ['fval', 'success']:
             continue
 
         for subkey in rslt[key_].keys():
@@ -48,8 +47,6 @@ def inspect(rslt, init_dict):
     effects += [np.mean(B[D == 0])]
 
     # Print selected results to file
-
-
     with open('results.txt', 'w') as file_:
 
         file_.write('\n softEcon: Generalized Roy Model')
