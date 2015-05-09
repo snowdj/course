@@ -19,7 +19,7 @@ MAX_NUM_COVARS_COST = 5
 ''' Main function '''
 
 
-def random_init():
+def random_init(seed=None):
     """ This function simulated a random initialization file.
 
         This function already imposes that I have at least one covariate in X
@@ -27,13 +27,16 @@ def random_init():
         
     """
 
+    # Set random seed
+    if seed is not None:
+        np.random.seed(seed )
+
     init_dict = dict()
 
     # Basics
     init_dict['BASICS'] = dict()
 
-    init_dict['BASICS']['agents'] = np.random.random_integers(1,
-                                                                  MAX_AGENTS)
+    init_dict['BASICS']['agents'] = np.random.random_integers(1, MAX_AGENTS)
 
     init_dict['BASICS']['file'] = id_generator()
 

@@ -3,6 +3,7 @@
 """
 
 # standard library
+import copy
 import numpy as np
 
 # project library
@@ -20,7 +21,8 @@ def inspect(rslt, init_dict):
     assert (isinstance(init_dict, dict))
 
     # Update parameters
-    modified_init = init_dict
+    modified_init = copy.deepcopy(init_dict)
+
 
     for key_ in rslt.keys():
 
