@@ -37,6 +37,12 @@ fig.vlines(x = tut, ymin = y.min(), ymax = max(y)+0.1,
             color = "green", linewidth = 2.5, linestyle = "dashed", label = "TUT")
 fig.plot(x, y, color = "darkblue", linewidth = 2.5, linestyle = "-")
 
+
+# Labeling..
+pl.xlabel(r''' B''', fontsize = 20)
+pl.ylabel('''Density''', fontsize = 12)
+
+
 box = fig.get_position()
 
 fig.legend(loc = 'upper center')
