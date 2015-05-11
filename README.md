@@ -25,8 +25,8 @@ Contact:
     * [Package](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/economic_models/generalized_roy/package/lecture.ipynb)
     * [Toolbox](https://github.com/grmtoolbox)
 * [Integrated Development Environment](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/integrated_development_environment/lecture.ipynb) 
-* [Version Control](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/version_control/lecture.ipynb) 
 * [Object Oriented Programming](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/object_oriented_programming/lecture.ipynb) 
+* [Version Control](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/version_control/lecture.ipynb) 
 
 ## Guest Presentations
 
