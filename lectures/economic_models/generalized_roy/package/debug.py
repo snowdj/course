@@ -85,3 +85,5 @@ while True:
     os.remove(init_dict['BASICS']['file'])
 
     print 'next'
+
+    raise NotImplementedError, 'test'
