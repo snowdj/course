@@ -33,7 +33,7 @@ def inspect(rslt, init_dict):
             modified_init[key_][subkey] = rslt[key_][subkey]
 
     # Modified dataset
-    modified_init['BASICS']['file'] = 'simulated.txt'
+    modified_init['BASICS']['file'] = 'simulated.grm.txt'
 
     # Simulate from estimation results
     Y1, Y0, D = simulate(modified_init, True)
@@ -47,7 +47,7 @@ def inspect(rslt, init_dict):
     effects += [np.mean(B[D == 0])]
 
     # Print selected results to file
-    with open('results.txt', 'w') as file_:
+    with open('results.grm.txt', 'w') as file_:
 
         file_.write('\n softEcon: Generalized Roy Model')
         file_.write('\n -------------------------------\n')
