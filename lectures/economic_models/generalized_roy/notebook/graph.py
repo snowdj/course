@@ -30,7 +30,7 @@ pl.yticks(np.arange(0, max(y)+0.1, 0.05)[1:])
 fig.vlines(x = mean, ymin = y.min(), ymax = max(y)+0.1,
           color = "red", linewidth = 2.5, linestyle = "-", label = "ATE")
 fig.vlines(x = mte, ymin = y.min(), ymax = max(y)+0.1,
-           color = "black", linewidth = 2.5, linestyle = "dashed", label = "MTE")
+           color = "black", linewidth = 2.5, linestyle = "dashed", label = r''' $B^{MTE}$''')
 fig.vlines(x = tt, ymin = y.min(), ymax = max(y)+0.1,
             color = "blue", linewidth = 2.5, linestyle = "dashed", label = "TT")
 fig.vlines(x = tut, ymin = y.min(), ymax = max(y)+0.1,
@@ -42,9 +42,9 @@ box = fig.get_position()
 fig.legend(loc = 'upper center')
 fig.set_position([box.x0, box.y0 + box.height * 0.15, box.width, box.height * 0.88])
 fig.legend(loc = 'upper center', bbox_to_anchor = (0.5, -0.10),
-    fancybox = False, frameon = False, shadow = False, ncol = 3)
+    fancybox = False, frameon = False, shadow = False, ncol = 4)
 
-pl.savefig("treatment_effects.png")
+pl.savefig("images/treatment_effects.png")
 
 # Marginal Treatment Effects
 
@@ -117,7 +117,7 @@ fig.hlines(y = 0.1, xmin = 0.00, xmax = 0.50, color = 'k', linestyle = '--')
 # Text.
 fig.text(0.42, 0.15, r'$P(x,z) = 0.50$', fontsize = 15)
 
-pl.savefig('marginalRelationships.png')
+pl.savefig('images/marginal_relationships.png')
 
 
 # Joint Distribution of Potential Outcomes
@@ -170,4 +170,4 @@ ax.set_ylabel('$Y_1$', fontsize=15)
 
 pl.yticks(np.arange(-1, 5, 1)[1:])
 pl.plot([-1, 4], [-1, 4], color = "black", linewidth = 1)
-pl.savefig("joint_dist.png")
+pl.savefig("images/joint_dist.png")
