@@ -13,35 +13,75 @@ sys.path.insert(0, 'grmpy')
 import grmpy as gp
 # project library
 from tests._auxiliary import random_init
-
+from tools.economics.clsAgent import AgentCls
+from tools.optimization.estimation import _load_data, _object_negative_log_likelihood
 # Generate random request
-init_dict = random_init()
 
-# Let us make sure to have a setup that is very favourable to
-# the performance of our estimator for now. In my experience,
-# small unobserved variability in agent choices and outcomes
-# and a large agent count does the trick. Of course, later
-# you would want to investigate the performance of your
-# estimator for more challenging setups.
-for key_ in ['COST', 'TREATED', 'UNTREATED']:
-    init_dict[key_]['var'] = 0.02
+if False:
+    init_dict = gp.process('init.ini')
 
-init_dict['BASICS']['agents'] = 10000
+    # Simulate synthetic sample
+    gp.simulate(init_dict)
 
-# We need to ensure that the random request actually entails
-# a serious estimation run.
-init_dict['ESTIMATION']['maxiter'] = 0
-init_dict['ESTIMATION']['start'] = 'random'
-init_dict['ESTIMATION']['version'] = 'fast'
-init_dict['ESTIMATION']['optimizer'] = 'bfgs'
+    # Load dataset
+    Y, D, X, Z, agent_objs = _load_data(init_dict)
 
-# Simulate synthetic sample
-gp.simulate(init_dict)
+    _object_negative_log_likelihood(init_dict, agent_objs)
 
-# Estimate model
-rslt = gp.estimate(init_dict)
-# Write results
-gp.inspect(rslt, init_dict)
-print rslt['COST']['all']
-print init_dict['COST']['all']
+    # Process initialization file
+    init_dict = gp.process('init.ini')
 
+    # Simulate synthetic sample
+    gp.simulate(init_dict)
+
+    # Estimate model
+    rslt = gp.estimate(init_dict)
+
+    # Write results
+    gp.inspect(rslt, init_dict)
+
+    # Inspect the results
+    print rslt
+
+# project library
+from tests._auxiliary import random_init
+
+
+# Set the number of tests to run
+NUM_TESTS = 10
+
+# Run repeated tests
+while True:
+
+    # Generate random request
+    init_dict = random_init()
+
+    # Ensure same starting value. If we choose the random
+    # starting values instead, the points of evaluation
+    # differ for the slow and fast implementations.
+    init_dict['ESTIMATION']['start'] = 'init'
+
+    init_dict['ESTIMATION']['maxiter'] = 1
+
+    # Simulate sample
+    gp.simulate(init_dict)
+
+    # Initialize result container
+    rslt = dict()
+
+    # Estimate generalized Roy model
+    for version in ['slow', 'fast', 'object']:
+
+        init_dict['ESTIMATION']['version'] = version
+
+        rslt[version] = gp.estimate(init_dict)['fval']
+
+    # Assert equality of results
+    np.testing.assert_allclose(rslt['slow'], rslt['fast'])
+
+    np.testing.assert_allclose(rslt['slow'], rslt['object'])
+
+    # Cleanup
+    os.remove(init_dict['BASICS']['file'])
+
+    print 'next'

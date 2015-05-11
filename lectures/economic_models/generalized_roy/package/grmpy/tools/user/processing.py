@@ -92,7 +92,6 @@ def _check_integrity_process(dict_):
 
     # Implementations
     assert (dict_['ESTIMATION']['version'] in ['fast', 'slow', 'object'])
-    assert (dict_['ESTIMATION']['version'] in ['fast', 'slow'])
 
     # Finishing
     return True

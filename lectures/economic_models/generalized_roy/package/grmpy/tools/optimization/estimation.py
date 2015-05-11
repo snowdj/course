@@ -7,6 +7,9 @@ import numpy as np
 from scipy.stats import norm
 from scipy.optimize import minimize
 
+# project library
+from tools.economics.clsAgent import AgentCls
+
 ''' Main function '''
 
 
@@ -17,7 +20,7 @@ def estimate(init_dict):
     assert (isinstance(init_dict, dict))
 
     # Load dataset
-    Y, D, X, Z = _load_data(init_dict)
+    Y, D, X, Z, agent_objs = _load_data(init_dict)
 
     # Create auxiliary objects
     start = init_dict['ESTIMATION']['start']
@@ -47,14 +50,11 @@ def estimate(init_dict):
     # Run optimization or just evaluate function at starting values
     if maxiter == 0:
 
-        # Auxiliary objects.
-        num_covars_out = X.shape[1]
-
         # Collect maximization arguments.
         rslt = _distribute_parameters(np.array(x0), init_dict, num_covars_out)
 
         # Calculate likelihood according to user's request
-        likl = _negative_log_likelihood(rslt, Y, D, X, Z, version)
+        likl = _negative_log_likelihood(rslt, Y, D, X, Z, agent_objs, version)
 
         # Compile results
         x_rslt, fun, success = x0, likl, False
@@ -66,7 +66,7 @@ def estimate(init_dict):
         #  a variety of alternative maximization algorithms. You will also
         # find information about the return information.
         opt_rslt = minimize(_max_interface, x0,
-                            args=(Y, D, X, Z, version, init_dict),
+                            args=(Y, D, X, Z, agent_objs, version, init_dict),
                             method=optimizer, options=opts)
 
         # Compile results
@@ -86,6 +86,7 @@ def estimate(init_dict):
 # Note that the name of all auxiliary functions starts with an underscore.
 # This ensures that the function is private to the module. A standard import
 # of this module will not make this function available.
+
 
 def _distribute_parameters(x, init_dict, num_covars_out):
     """ Distribute the parameters.
@@ -130,23 +131,26 @@ def _distribute_parameters(x, init_dict, num_covars_out):
     return rslt
 
 
-def _max_interface(x, Y, D, X, Z, version, init_dict):
+def _max_interface(x, Y, D, X, Z, agent_objs, version, init_dict):
     """ Interface to the SciPy maximization routines.
     """
-    # Auxiliary objects.
-    num_covars_out = X.shape[1]
+    # Auxiliary objects
+    try:
+        num_covars_out = X.shape[1]
+    except AttributeError:
+        num_covars_out = len(agent_objs[0].attr['exog']['outcome'])
 
-    # Collect maximization arguments.
+    # Collect maximization arguments
     rslt = _distribute_parameters(x, init_dict, num_covars_out)
 
-    # Calculate likelihood.
-    likl = _negative_log_likelihood(rslt, Y, D, X, Z, version)
+    # Calculate likelihood
+    likl = _negative_log_likelihood(rslt, Y, D, X, Z, agent_objs, version)
 
     # Finishing.
     return likl
 
 
-def _negative_log_likelihood(args, Y, D, X, Z, version):
+def _negative_log_likelihood(args, Y, D, X, Z, agent_objs, version):
     """ Negative log-likelihood evaluation.
     """
 
@@ -156,7 +160,7 @@ def _negative_log_likelihood(args, Y, D, X, Z, version):
     elif version == 'fast':
         likl = _fast_negative_log_likelihood(args, Y, D, X, Z)
     elif version == 'object':
-        raise NotImplementedError
+        likl = _object_negative_log_likelihood(args, agent_objs)
     else:
         raise AssertionError
 
@@ -164,8 +168,36 @@ def _negative_log_likelihood(args, Y, D, X, Z, version):
     return likl
 
 
+def _object_negative_log_likelihood(args, agent_objs):
+    """ Negative Log-likelihood function of the generalized Roy model.
+    """
+
+    num_agents = len(agent_objs)
+
+    likl = np.tile(np.nan, num_agents)
+
+    for i, agent_obj in enumerate(agent_objs):
+
+        agent_obj.unlock()
+
+        agent_obj.set_economic_environment(args)
+
+        agent_obj.lock()
+
+        likl[i] = agent_obj._calculate_individual_likelihood()
+
+    # Transformations.
+    likl = -np.mean(np.log(np.clip(likl, 1e-20, np.inf)))
+
+    # Quality checks.
+    assert (isinstance(likl, float))
+    assert (np.isfinite(likl))
+
+    # Finishing.
+    return likl
+
 def _slow_negative_log_likelihood(args, Y, D, X, Z):
-    """ Negative Log-likelihood function of the Generalized Roy Model.
+    """ Negative Log-likelihood function of the generalized Roy model.
     """
     # Distribute parametrization
     Y1_coeffs = np.array(args['TREATED']['all'])
@@ -288,6 +320,9 @@ def _load_data(init_dict):
     # Auxiliary objects
     num_covars_out = init_dict['AUX']['num_covars_out']
     num_covars_cost = init_dict['AUX']['num_covars_cost']
+    num_agents = init_dict['BASICS']['agents']
+
+    is_object = (init_dict['ESTIMATION']['version'] == 'object')
 
     # Read dataset
     data = np.genfromtxt(init_dict['BASICS']['file'])
@@ -302,8 +337,36 @@ def _load_data(init_dict):
 
     X, Z = data[:, 2:(num_covars_out + 2)], data[:, -num_covars_cost:]
 
+    # Create object-oriented version of sample
+    agent_objs = None
+
+    if is_object:
+
+        agent_objs = []
+
+        for i in range(num_agents):
+
+            agent_obj = AgentCls()
+
+            agent_obj.set_exogeneous_characteristics('cost', list(Z[i,:]))
+
+            agent_obj.set_exogeneous_characteristics('outcome', list(X[i,:]))
+
+            agent_obj.set_endogenous_characteristics('choice', int(D[i]))
+
+            agent_obj.set_endogenous_characteristics('outcome', Y[i])
+
+            agent_obj.set_economic_environment(init_dict)
+
+            agent_obj.lock()
+
+            agent_objs += [agent_obj]
+
+        # Clear data containers
+        Y, D, X, Z = None, None, None, None
+
     # Finishing
-    return Y, D, X, Z
+    return Y, D, X, Z, agent_objs
 
 
 def _get_start(which, init_dict):
