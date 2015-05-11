@@ -63,7 +63,7 @@ def estimate(init_dict):
 
         # Check out the SciPy documentation for details about the interface
         # to the `minimize' function that provides a convenient interface to
-        #  a variety of alternative maximization algorithms. You will also
+        # a variety of alternative maximization algorithms. You will also
         # find information about the return information.
         opt_rslt = minimize(_max_interface, x0,
                             args=(Y, D, X, Z, agent_objs, version, init_dict),
@@ -126,6 +126,8 @@ def _distribute_parameters(x, init_dict, num_covars_out):
     rslt['AUX']['x_internal'][-3] = np.exp(x[(-3)])
     rslt['AUX']['x_internal'][-2] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-2])))
     rslt['AUX']['x_internal'][-1] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-1])))
+
+    rslt['AUX']['init_values'] = init_dict['AUX']['init_values']
 
     # Finishing.
     return rslt
