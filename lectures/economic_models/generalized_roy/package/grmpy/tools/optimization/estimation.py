@@ -198,29 +198,16 @@ def _object_negative_log_likelihood(args, agent_objs):
     # Finishing.
     return likl
 
+
 def _slow_negative_log_likelihood(args, Y, D, X, Z):
     """ Negative Log-likelihood function of the generalized Roy model.
     """
-    # Distribute parametrization
-    Y1_coeffs = np.array(args['TREATED']['all'])
-    Y0_coeffs = np.array(args['UNTREATED']['all'])
-    C_coeffs = np.array(args['COST']['all'])
+    # Distribute arguments
+    Y1_coeffs, Y0_coeffs, C_coeffs, choice_coeffs, U1_var, U0_var, U1V_rho, \
+    U0V_rho, V_var, U1_sd, U0_sd, V_sd = _distribute_arguments(args)
 
-    U1_var = args['TREATED']['var']
-    U0_var = args['UNTREATED']['var']
-
-    var_V = args['COST']['var']
-
-    U1V_rho = args['RHO']['treated']
-    U0V_rho = args['RHO']['untreated']
-
-    # Auxiliary objects.
-    U1_sd = np.sqrt(U1_var)
-    U0_sd = np.sqrt(U0_var)
-    V_sd = np.sqrt(var_V)
-
+    # Auxiliary objects
     num_agents = Y.shape[0]
-    choice_coeffs = np.concatenate((Y1_coeffs - Y0_coeffs, - C_coeffs))
 
     # Initialize containers
     likl = np.tile(np.nan, num_agents)
@@ -229,8 +216,8 @@ def _slow_negative_log_likelihood(args, Y, D, X, Z):
     # Likelihood construction.
     for i in range(num_agents):
 
-        G = np.concatenate((X[i, :], Z[i, :]))
-        choice_idx[i] = np.dot(choice_coeffs, G)
+        g = np.concatenate((X[i, :], Z[i, :]))
+        choice_idx[i] = np.dot(choice_coeffs, g)
 
         # Select outcome information
         if D[i] == 1.00:
@@ -241,7 +228,7 @@ def _slow_negative_log_likelihood(args, Y, D, X, Z):
 
         arg_one = (Y[i] - np.dot(coeffs, X[i, :])) / sd
         arg_two = (choice_idx[i] - rho * V_sd * arg_one) / \
-                  np.sqrt((1.0 - rho ** 2) * var_V)
+                  np.sqrt((1.0 - rho ** 2) * V_var)
 
         pdf_evals, cdf_evals = norm.pdf(arg_one), norm.cdf(arg_two)
 
@@ -266,30 +253,12 @@ def _slow_negative_log_likelihood(args, Y, D, X, Z):
 def _fast_negative_log_likelihood(args, Y, D, X, Z):
     """ Negative Log-likelihood function of the Generalized Roy Model.
     """
-    # Distribute parametrization
-    Y1_coeffs = np.array(args['TREATED']['all'])
-    Y0_coeffs = np.array(args['UNTREATED']['all'])
-
-    C_coeffs = np.array(args['COST']['all'])
-
-    U1_var = args['TREATED']['var']
-    U0_var = args['UNTREATED']['var']
-
-    U1V_rho = args['RHO']['treated']
-    U0V_rho = args['RHO']['untreated']
-    V_var = args['COST']['var']
-
-    U1_sd = np.sqrt(U1_var)
-    U0_sd = np.sqrt(U0_var)
-    V_sd = np.sqrt(V_var)
-
-    # Auxiliary objects.
-    num_agents = Y.shape[0]
-    choice_coeffs = np.concatenate((Y1_coeffs - Y0_coeffs, - C_coeffs))
+    # Distribute arguments
+    Y1_coeffs, Y0_coeffs, C_coeffs, choice_coeffs, U1_var, U0_var, U1V_rho, \
+    U0V_rho, V_var, U1_sd, U0_sd, V_sd = _distribute_arguments(args)
 
     # Likelihood construction.
     G = np.concatenate((X, Z), axis=1)
-
     choice_idx = np.dot(choice_coeffs, G.T)
 
     arg_one = D * (Y - np.dot(Y1_coeffs, X.T)) / U1_sd + \
@@ -433,3 +402,30 @@ def _transform_start(x):
 
     # Finishing
     return x
+
+
+def _distribute_arguments(args):
+    """ Distribute arguments for evaluation of criterion function and some
+        auxiliary parameters.
+    """
+    Y1_coeffs = np.array(args['TREATED']['all'])
+    Y0_coeffs = np.array(args['UNTREATED']['all'])
+
+    C_coeffs = np.array(args['COST']['all'])
+
+    U1_var = args['TREATED']['var']
+    U0_var = args['UNTREATED']['var']
+
+    U1V_rho = args['RHO']['treated']
+    U0V_rho = args['RHO']['untreated']
+    V_var = args['COST']['var']
+
+    U1_sd = np.sqrt(U1_var)
+    U0_sd = np.sqrt(U0_var)
+    V_sd = np.sqrt(V_var)
+
+    choice_coeffs = np.concatenate((Y1_coeffs - Y0_coeffs, - C_coeffs))
+
+    # Finishing
+    return Y1_coeffs, Y0_coeffs, C_coeffs, choice_coeffs, U1_var, U0_var, \
+           U1V_rho, U0V_rho, V_var, U1_sd, U0_sd, V_sd

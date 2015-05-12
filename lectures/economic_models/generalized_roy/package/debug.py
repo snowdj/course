@@ -1,143 +1,83 @@
-""" This module is used in the development process of the grmpy package.
-"""
-
-# standard library
-import os
-import sys
-import numpy as np
-
-# edit PYTHONPATH
-sys.path.insert(0, 'grmpy')
-
-# project library
-import grmpy as gp
-# project library
-from tests._auxiliary import random_init
-from tools.economics.clsAgent import AgentCls
-from tools.optimization.estimation import _load_data, _object_negative_log_likelihood
-# Generate random request
-
-if False:
-    init_dict = gp.process('init.ini')
-
-    # Simulate synthetic sample
-    gp.simulate(init_dict)
-
-    # Load dataset
-    Y, D, X, Z, agent_objs = _load_data(init_dict)
-
-    _object_negative_log_likelihood(init_dict, agent_objs)
-
-    # Process initialization file
-    init_dict = gp.process('init.ini')
-
-    # Simulate synthetic sample
-    gp.simulate(init_dict)
-
-    # Estimate model
-    rslt = gp.estimate(init_dict)
-
-if False:
-    # project library
-    from tests._auxiliary import random_init
-
-
-    # Set the number of tests to run
-    NUM_TESTS = 10
-
-    # Run repeated tests
-    while True:
-
-        # Generate random request
-        init_dict = random_init()
-
-        # Ensure same starting value. If we choose the random
-        # starting values instead, the points of evaluation
-        # differ for the slow and fast implementations.
-        init_dict['ESTIMATION']['start'] = 'init'
-
-        init_dict['ESTIMATION']['maxiter'] = 1
-
-        # Simulate sample
-        gp.simulate(init_dict)
-
-        # Initialize result container
-        rslt = dict()
-
-        # Estimate generalized Roy model
-        for version in ['slow', 'fast', 'object']:
-
-            init_dict['ESTIMATION']['version'] = version
-
-            rslt[version] = gp.estimate(init_dict)['fval']
-
-        # Assert equality of results
-        np.testing.assert_allclose(rslt['slow'], rslt['fast'])
-
-        np.testing.assert_allclose(rslt['slow'], rslt['object'])
-
-        # Cleanup
-        os.remove(init_dict['BASICS']['file'])
-
-        print 'next'
-
-        raise NotImplementedError, 'test'
-
-
-
-print 'Special case where maxiter = 0 and start = init'
-
-def rmse(rslt):
-    """ Calculate the root-mean squared error.
+def _slow_negative_log_likelihood(args, Y, D, X, Z):
+    """ Negative Log-likelihood function of the generalized Roy model.
     """
-    # Antibugging
-    assert (isinstance(rslt, dict))
+    # Distribute arguments
+    Y1_coeffs, Y0_coeffs, C_coeffs, choice_coeffs, U1_var, U0_var, U1V_rho, \
+    U0V_rho, V_var, U1_sd, U0_sd, V_sd = _distribute_arguments(args)
 
-    # Distribute information
-    x_internal = rslt['AUX']['x_internal']
-    start_internal = rslt['AUX']['init_values']
-
-    # Calculate statistic
-    rslt = ((x_internal - start_internal) ** 2).mean()
-
-    # Antibugging
-    assert (np.isfinite(rslt))
-    assert (rslt > 0.0)
-
-    # Finishing
-    return rslt
-
-init_dict = gp.process('init.ini')
-
-# Simulate synthetic sample
-rslt = dict()
-
-for optimizer in ['bfgs', 'nm']:
+    # Auxiliary objects
+    num_agents = Y.shape[0]
 
     # Initialize containers
-    rslt[optimizer] = []
+    likl = np.tile(np.nan, num_agents)
+    choice_idx = np.tile(np.nan, num_agents)
 
-    # Ensure same simulated setup
-    np.random.seed(123)
+    # Likelihood construction.
+    for i in range(num_agents):
 
-    for i in range(10):
+        g = np.concatenate((X[i, :], Z[i, :]))
+        choice_idx[i] = np.dot(choice_coeffs, g)
 
-        # Increase noise in observed sample
-        init_dict['COST']['var'] = 0.01 + i*0.25
-        init_dict['TREATED']['var'] = 0.01 + i*0.25
-        init_dict['UNTREATED']['var'] = 0.01 + i*0.25
+        # Select outcome information
+        if D[i] == 1.00:
 
-        # Simulate dataset
-        gp.simulate(init_dict)
+            coeffs, rho, sd = Y1_coeffs, U1V_rho, U1_sd
+        else:
+            coeffs, rho, sd = Y0_coeffs, U0V_rho, U0_sd
 
-        # Select estimation setup
-        init_dict['ESTIMATION']['version'] = 'fast'
-        init_dict['ESTIMATION']['maxiter'] = 10000
-        init_dict['ESTIMATION']['optimizer'] = optimizer
-        init_dict['ESTIMATION']['start'] = 'random'
+        arg_one = (Y[i] - np.dot(coeffs, X[i, :])) / sd
+        arg_two = (choice_idx[i] - rho * V_sd * arg_one) / \
+                  np.sqrt((1.0 - rho ** 2) * V_var)
 
-        # Calculate performance statistic
-        stat = rmse(gp.estimate(init_dict))
+        pdf_evals, cdf_evals = norm.pdf(arg_one), norm.cdf(arg_two)
 
-        # Collect results
-        rslt[optimizer] += [stat]
+        if D[i] == 1.0:
+            contrib = (1.0 / float(sd)) * pdf_evals * cdf_evals
+        else:
+            contrib = (1.0 / float(sd)) * pdf_evals * (1.0 - cdf_evals)
+
+        likl[i] = contrib
+
+    # Transformations.
+    likl = -np.mean(np.log(np.clip(likl, 1e-20, np.inf)))
+
+    # Quality checks.
+    assert (isinstance(likl, float))
+    assert (np.isfinite(likl))
+
+    # Finishing.
+    return likl
+
+def _fast_negative_log_likelihood(args, Y, D, X, Z):
+    """ Negative Log-likelihood function of the Generalized Roy Model.
+    """
+    # Distribute arguments
+    Y1_coeffs, Y0_coeffs, C_coeffs, choice_coeffs, U1_var, U0_var, U1V_rho, \
+    U0V_rho, V_var, U1_sd, U0_sd, V_sd = _distribute_arguments(args)
+
+    # Likelihood construction.
+    G = np.concatenate((X, Z), axis=1)
+    choice_idx = np.dot(choice_coeffs, G.T)
+
+    arg_one = D * (Y - np.dot(Y1_coeffs, X.T)) / U1_sd + \
+             (1 - D) * (Y - np.dot(Y0_coeffs, X.T)) / U0_sd
+
+    arg_two = D * (choice_idx - V_sd * U1V_rho * arg_one) / np.sqrt(
+        (1.0 - U1V_rho ** 2) * V_var) + \
+        (1 - D) * (choice_idx - V_sd * U0V_rho * arg_one) / np.sqrt(
+                 (1.0 - U0V_rho ** 2) * V_var)
+
+    pdf_evals, cdf_evals = norm.pdf(arg_one), norm.cdf(arg_two)
+
+    likl = D * (1.0 / U1_sd) * pdf_evals * cdf_evals + \
+           (1 - D) * (1.0 / U0_sd) * pdf_evals * (1.0 - cdf_evals)
+
+    # Transformations.
+    likl = -np.mean(np.log(np.clip(likl, 1e-20, np.inf)))
+
+    # Quality checks.
+    assert (isinstance(likl, float))
+    assert (np.isfinite(likl))
+
+    # Finishing.
+    return likl
