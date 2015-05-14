@@ -38,7 +38,7 @@ class EconomyCls(object):
         agent_objs = self.population
 
         # Initialize result container
-        rslt = [0.0, 0.0]
+        rslt = np.array([0.0, 0.0])
 
         # Loop over all agents in the population.
         for agent_obj in agent_objs:
@@ -48,6 +48,9 @@ class EconomyCls(object):
             demand = agent_obj.get_individual_demand()
 
             rslt += demand
+
+        # Type conversion
+        rslt = rslt.tolist()
 
         # Quality Assurance
         integrity_checks('get_aggregate_demand_out', rslt)

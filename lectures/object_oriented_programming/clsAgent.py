@@ -1,6 +1,5 @@
 """ This module contains the class representation of the agents in the
     economy.
-
 """
 
 __all__ = ['AgentCls']
@@ -26,6 +25,8 @@ class AgentCls(object):
         self.y, self.x = None, None         # Endowment and consumption bundle
 
         self.type, self.alpha = None, None  # Type and preference parameter
+
+    ''' Public Methods'''
 
     def set_type(self, type_):
         """ Set the type of the agent.
@@ -106,7 +107,9 @@ class AgentCls(object):
         # Finishing
         return u
 
-    def spending(self, x, p1, p2):
+    # Static methods do not receive an implicit first argument.
+    @ staticmethod
+    def spending(x, p1, p2):
         """ Calculate spending level.
         """
         # Antibugging
@@ -122,7 +125,7 @@ class AgentCls(object):
         return e
 
     ''' Private methods '''
-    # Static methods do not receive an implicit first argument.
+
     @ staticmethod
     def _choose_random(y, p1, p2):
         """ Choose a random bundle on the budget line.

@@ -6,37 +6,62 @@ import numpy as np
 from clsEconomy import *
 from clsAgent import *
 
+NUM_AGENTS = 10   # Number of agents in the population
 
-if True:
+ENDOWMENT = 10.0  # Endowments of agents
 
-    NUM_AGENTS = 1
+ALPHA = 0.75      # Utility weights
 
-    ENDOWMENT = 10.0
+P1 = 1.0         # Price of first good (Numeraire)
 
-    ALPHA = 0.5
+NUM_POINTS = 25   # Number of points for grid of proce changes
 
-    P1 = 0.1
+# Construct grid for price changes.
+PRICE_GRID = np.linspace(P1, 10, num=NUM_POINTS)
 
-    # Auxiliary
-    price_grid = np.linspace(P1, 1.0, num=25)
+# Simulate agent populations of different types
+agent_objs = dict()
+
+for type_ in ['random', 'rational']:
+
+    agent_objs[type_] = []
+
+    for _ in range(NUM_AGENTS):
+
+        agent_obj = AgentCls()
+
+        agent_obj.set_type(type_)
+
+        agent_obj.set_preference_parameter(ALPHA)
+
+        agent_obj.set_endowment(ENDOWMENT)
+
+        agent_obj.choose(P1, P1)
+
+        agent_objs[type_] += [agent_obj]
 
 
-    # Simulate agent populations of different types
-    agent_objs = dict()
+# Get market demands for varying price schedules
+market_demands = dict()
 
-    agent_obj = AgentCls()
+for type_ in ['random', 'rational']:
 
-    agent_obj.set_type('rational')
+    market_demands[type_] = []
 
-    agent_obj.set_preference_parameter(ALPHA)
+    # Initialze economy with agent of particular types
+    economy_obj = EconomyCls(agent_objs[type_])
 
-    agent_obj.set_endowment(ENDOWMENT)
+    # Vary price schedule
+    for p2 in PRICE_GRID:
 
-    agent_obj.choose(P1, P1)
+        # Construct market demand for second good
+        demand = economy_obj.get_aggregate_demand(P1, P1)[1]
 
-    agent_obj.get_individual_demand()
+        print demand
 
-    agent_objs = [agent_obj]
 
-    EconomyCls(agent_objs)
+        # Scaling to average demand
+        demand = demand/float(NUM_AGENTS)
 
+        # Collect demands
+        market_demands[type_] += [demand]
