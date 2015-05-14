@@ -1,128 +1,99 @@
 """ This module contains the class representation of the agents in the
     economy.
+
 """
+
+__all__ = ['AgentCls']
+# This restricts the imported names to AgentClass when
+# -- from package import * -- is encountered.
+
+# standard library
+import numpy as np
+from scipy.optimize import minimize
+
+# We collect all integrity checks to an
+# external function in an external file.
+from _checks import integrity_checks
+
 
 class AgentCls(object):
 
     def __init__(self):
+        """ Initialize instance of agent class.
+        """
 
+        # Define class attributes
+        self.y, self.x = None, None         # Endowment and consumption bundle
 
-        # Goods demand
-        self.x1 = None
-
-        self.x2 = None
-
-        # Endowment
-        self.y = None
-
-        self.type = None
-
-        # Prices
-        self.p1 = None
-
-        self.p2 = None
-
-        self.made_choice = False
-
-        self.u = None
-
-        self.alpha = None
+        self.type, self.alpha = None, None  # Type and preference parameter
 
     def set_type(self, type_):
+        """ Set the type of the agent.
+        """
+        # Antibugging
+        integrity_checks('set_type', type_)
 
+        # Attach type as class attribute
         self.type = type_
 
     def set_endowment(self, y):
         """ Set the endowment.
         """
         # Antibugging
-        assert (isinstance(y, float))
-        assert (y >= 0)
+        integrity_checks('set_endowment', y)
 
-        # Set agent endowment
+        # Attach endowment as class attribute
         self.y = y
 
     def set_preference_parameter(self, alpha):
+        """ Set the preference parameter.
+        """
+        # Antibugging
+        integrity_checks('set_preference_parameter', alpha)
 
+        # Attach preference parameter as class attribute
         self.alpha = alpha
 
     def choose(self, p1, p2):
-        """ Choose goods given agent preferences and budget constraints.
+        """ Choose the desired bundle of goods for different agent
+            decision rules.
         """
+        # Antibugging
+        integrity_checks('choose', p1, p2)
 
+        # Distribute class attributes
+        type_, y = self.type, self.y
 
-        type_ = self.type
-
-        self.p1 = p1
-
-        self.p2 = p2
-
-
-
-        # Determine starting values
-        y = self.y
-
-
+        # Select decision rule
         if type_ == 'rational':
 
-            x0 = np.array([(0.5*y)/p1, (0.5*y)/p2])
-
-            # Construct budget constraint
-            constraint_divergence = dict()
-
-            constraint_divergence['type'] = 'eq'
-
-            constraint_divergence['fun'] = self._constraint
-
-            constraints = [constraint_divergence, ]
-
-            # Call constraint-optimizer
-            rslt = minimize(self._criterion, x0, method='SLSQP',
-                            constraints=constraints)
-
-            assert (rslt['success'] == True)
-
-            # Transformation of result.
-            x = rslt['x']**2
-
-            # Type conversion
-            x = x.tolist()
+            x = self._choose_rational(y, p1, p2)
 
         elif type_ == 'random':
-            #
-            # Random choice on on the budget line.
-            #
 
-            # Determine maximum demand of good two.
-            max_two = y/p2
-
-            x = [None, None]
-
-            x[1] = float(np.random.uniform(0, max_two))
-
-            x[0] = (y - x[1]*p2)/p1
+            x = self._choose_random(y, p1, p2)
 
         else:
 
             raise AssertionError
 
         # Update class attributes
-        self.x, self.made_choice = x, True
+        self.x = x
 
     def get_individual_demand(self):
-        """ Get good demands
+        """ Get the agents demand for the goods.
         """
-        # Antibugging
-        assert (self.made_choice is True)
+        # Extract demand from class attributes
+        rslt = self.x[:]
 
-        # Copy demands
-        rslt = self.x
+        # Quality Checks
+        integrity_checks('get_individual_demand', rslt)
 
         # Finishing
         return rslt
 
-    def utility(self, x):
-        """ Evaluate utility.
+    def get_utility(self, x):
+        """ Evaluate utility of agent.
         """
         # Distribute input arguments
         x1, x2 = x
@@ -130,16 +101,16 @@ class AgentCls(object):
         alpha = self.alpha
 
         # Utility calculation
-        u = (x1 ** alpha)*(x2 ** (1.0 - alpha))
+        u = (x1 ** alpha) * (x2 ** (1.0 - alpha))
 
         # Finishing
         return u
 
-    def spending(self, x):
+    def spending(self, x, p1, p2):
         """ Calculate spending level.
         """
-        # Distribute prices
-        p1, p2 = self.p1, self.p2
+        # Antibugging
+        integrity_checks('spending', x, p1, p2)
 
         # Distribute demands
         x1, x2 = x
@@ -151,22 +122,93 @@ class AgentCls(object):
         return e
 
     ''' Private methods '''
+    # Static methods do not receive an implicit first argument.
+    @ staticmethod
+    def _choose_random(y, p1, p2):
+        """ Choose a random bundle on the budget line.
+        """
+        # Antibugging
+        integrity_checks('_choose_random_in', y, p1, p2)
+
+        # Determine maximal consumption of good two
+        max_two = y / p2
+
+        # Initialize result container
+        x = [None, None]
+
+        # Select random bundle
+        x[1] = float(np.random.uniform(0, max_two))
+
+        x[0] = (y - x[1] * p2) / p1
+
+        # Quality Checks
+        integrity_checks('_choose_random_out', x)
+
+        # Finishing
+        return x
+
+    def _choose_rational(self, y, p1, p2):
+        """ Choose utility-maximizing bundle.
+        """
+        # Antibugging
+        integrity_checks('_choose_rational_in', y, p1, p2)
+
+        # Determine starting values
+        x0 = np.array([(0.5 * y) / p1, (0.5 * y) / p2])
+
+        # Construct budget constraint
+        constraint_divergence = dict()
+
+        constraint_divergence['type'] = 'eq'
+
+        constraint_divergence['args'] = (p1, p2)
+
+        constraint_divergence['fun'] = self._constraint
+
+        constraints = [constraint_divergence, ]
+
+        # Call constraint-optimizer. Of course, we could determine the
+        # optimal bundle directly, but I wanted to illustrate the use of
+        # a constraint optimization algorithm to you.
+        rslt = minimize(self._criterion, x0, method='SLSQP',
+                        constraints=constraints)
+
+        # Check for convergence
+        assert (rslt['success'] == True)
+
+        # Transformation of result.
+        x = rslt['x'] ** 2
+
+        # Type conversion
+        x = x.tolist()
+
+        # Quality Checks
+        integrity_checks('_choose_rational_out', x)
+
+        # Finishing
+        return x
 
     def _criterion(self, x):
-        """ Evaluate utility.
+        """ Evaluate criterion function.
         """
+        # Antibugging
+        integrity_checks('_criterion', x)
+
         # Ensure non-negativity of demand
         x = x ** 2
 
         # Utility calculation
-        u = self.utility(x)
+        u = self.get_utility(x)
 
         # Finishing
         return -u
 
-    def _constraint(self, x):
+    def _constraint(self, x, p1, p2):
         """ Non-negativity constraint for the SLSQP algorithm.
         """
+        # Antibugging
+        integrity_checks('_constraint', x, p1, p2)
+
         # Distribute endowment
         y = self.y
 
@@ -174,7 +216,7 @@ class AgentCls(object):
         x = x ** 2
 
         # Calculate savings
-        cons = y - self.spending(x)
+        cons = y - self.spending(x, p1, p2)
 
-        # Constraint
+        # Finishing
         return cons

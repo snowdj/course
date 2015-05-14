@@ -3,11 +3,11 @@
 # The rational agent.
 import numpy as np
 
-from scipy.optimize import minimize
+from clsEconomy import *
+from clsAgent import *
 
 
-
-if False:
+if True:
 
     NUM_AGENTS = 1
 
@@ -26,10 +26,17 @@ if False:
 
     agent_obj = AgentCls()
 
-           agent_obj.set_type('random')
+    agent_obj.set_type('rational')
 
-            agent_obj.set_preference_parameter(ALPHA)
+    agent_obj.set_preference_parameter(ALPHA)
 
-            agent_obj.set_endowment(ENDOWMENT)
+    agent_obj.set_endowment(ENDOWMENT)
 
-            agent_objs[type_] += [agent_obj]
+    agent_obj.choose(P1, P1)
+
+    agent_obj.get_individual_demand()
+
+    agent_objs = [agent_obj]
+
+    EconomyCls(agent_objs)
+
