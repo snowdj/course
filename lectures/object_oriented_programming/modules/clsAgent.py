@@ -2,8 +2,8 @@
     economy.
 """
 
-__all__ = ['AgentCls']
-# This restricts the imported names to AgentClass when
+__all__ = ['RationalAgent', 'RandomAgent']
+# This restricts the imported names to the two agent classes when
 # -- from package import * -- is encountered.
 
 # standard library
@@ -15,27 +15,19 @@ from scipy.optimize import minimize
 from _checks import integrity_checks
 
 
-class AgentCls(object):
+# Superclass
+class _AgentCls(object):
 
     def __init__(self):
         """ Initialize instance of agent class.
         """
 
         # Define class attributes
-        self.y, self.x = None, None         # Endowment and consumption bundle
+        self.y, self.x = None, None     # Endowment and consumption bundle
 
-        self.type, self.alpha = None, None  # Type and preference parameter
+        self.alpha = None               # Set preference parameter
 
     ''' Public Methods'''
-
-    def set_type(self, type_):
-        """ Set the type of the agent.
-        """
-        # Antibugging
-        integrity_checks('set_type', type_)
-
-        # Attach type as class attribute
-        self.type = type_
 
     def set_endowment(self, y):
         """ Set the endowment.
@@ -54,32 +46,6 @@ class AgentCls(object):
 
         # Attach preference parameter as class attribute
         self.alpha = alpha
-
-    def choose(self, p1, p2):
-        """ Choose the desired bundle of goods for different agent
-            decision rules.
-        """
-        # Antibugging
-        integrity_checks('choose', p1, p2)
-
-        # Distribute class attributes
-        type_, y = self.type, self.y
-
-        # Select decision rule
-        if type_ == 'rational':
-
-            x = self._choose_rational(y, p1, p2)
-
-        elif type_ == 'random':
-
-            x = self._choose_random(y, p1, p2)
-
-        else:
-
-            raise AssertionError
-
-        # Update class attributes
-        self.x = x
 
     def get_individual_demand(self):
         """ Get the agents demand for the goods.
@@ -124,10 +90,40 @@ class AgentCls(object):
         # Finishing
         return e
 
-    ''' Private methods '''
+    def choose(self, p1, p2):
+        """ Choose the desired bundle of goods for different agent
+            decision rules.
+        """
+        # Antibugging
+        integrity_checks('choose', p1, p2)
 
-    @ staticmethod
-    def _choose_random(y, p1, p2):
+        # Distribute class attributes
+        y = self.y
+
+        x = self._choose(y, p1, p2)
+
+        # Update class attributes
+        self.x = x
+
+    def _choose(self, y, p1, p2):
+        """ Actual implementation depends on the type of agent. This method
+            is overridden by the relevant method in the subclass.
+        """
+
+        pass
+
+
+# Inheritance
+# -----------
+#
+# The two different types of agents are based on the _AgentCls(). It is a
+# mechanism to reuse the code and allow for easy extensions.
+#
+
+# Subclass of _AgentCls() with random decision rule
+class RandomAgent(_AgentCls):
+
+    def _choose(self, y, p1, p2):
         """ Choose a random bundle on the budget line.
         """
         # Antibugging
@@ -150,7 +146,10 @@ class AgentCls(object):
         # Finishing
         return x
 
-    def _choose_rational(self, y, p1, p2):
+# Subclass of _AgentCls() wuth rational decision rule
+class RationalAgent(_AgentCls):
+
+    def _choose(self, y, p1, p2):
         """ Choose utility-maximizing bundle.
         """
         # Antibugging

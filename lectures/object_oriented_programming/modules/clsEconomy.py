@@ -14,7 +14,7 @@ from _checks import integrity_checks
 
 class EconomyCls(object):
 
-   def __init__(self, agent_objs):
+    def __init__(self, agent_objs):
         """ Initialize instance of economy class and attach the agent
             population as a class attribute.
         """
