@@ -59,20 +59,6 @@ class _AgentCls(object):
         # Finishing
         return rslt
 
-    def get_utility(self, x):
-        """ Evaluate utility of agent.
-        """
-        # Distribute input arguments
-        x1, x2 = x
-
-        alpha = self.alpha
-
-        # Utility calculation
-        u = (x1 ** alpha) * (x2 ** (1.0 - alpha))
-
-        # Finishing
-        return u
-
     # Static methods do not receive an implicit first argument.
     @ staticmethod
     def spending(x, p1, p2):
@@ -148,6 +134,20 @@ class RandomAgent(_AgentCls):
 
 # Subclass of _AgentCls() wuth rational decision rule
 class RationalAgent(_AgentCls):
+
+    def get_utility(self, x):
+        """ Evaluate utility of agent.
+        """
+        # Distribute input arguments
+        x1, x2 = x
+
+        alpha = self.alpha
+
+        # Utility calculation
+        u = (x1 ** alpha) * (x2 ** (1.0 - alpha))
+
+        # Finishing
+        return u
 
     def _choose(self, y, p1, p2):
         """ Choose utility-maximizing bundle.
