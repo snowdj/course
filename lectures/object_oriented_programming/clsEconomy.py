@@ -8,14 +8,13 @@ __all__ = ['EconomyCls']
 # standard library
 import numpy as np
 
-# We collect all integrity checks to an
 # external function in an external file.
 from _checks import integrity_checks
 
 
 class EconomyCls(object):
 
-    def __init__(self, agent_objs):
+   def __init__(self, agent_objs):
         """ Initialize instance of economy class and attach the agent
             population as a class attribute.
         """
