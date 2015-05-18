@@ -17,55 +17,37 @@ class AgentCls(MetaCls):
 
         # Exogenous attributes
         self.attr['exog'] = {}
-
         self.attr['exog']['outcome'] = None
-
         self.attr['exog']['cost'] = None
-
         self.attr['exog']['choice'] = None
 
         self.attr['endo'] = {}
         self.attr['endo']['choice'] = None
-
         self.attr['endo']['outcome'] = None
-
 
         # Economic Environment.
         self.attr['coeffs'] = {}
-
         self.attr['coeffs']['treated'] = None
-
         self.attr['coeffs']['untreated'] = None
-
         self.attr['coeffs']['cost'] = None
-
         self.attr['coeffs']['choice'] = None
 
-
+        # Variances
         self.attr['vars'] = {}
-
         self.attr['vars']['treated'] = None
         self.attr['vars']['untreated'] = None
         self.attr['vars']['cost'] = None
 
-
+        # Standard deviations
         self.attr['sds'] = {}
-
         self.attr['sds']['treated'] = None
         self.attr['sds']['untreated'] = None
         self.attr['sds']['cost'] = None
 
-
+        # Correlations
         self.attr['rhos'] = {}
-
         self.attr['rhos']['treated'] = None
         self.attr['rhos']['untreated'] = None
-
-        # Endogenous objects.
-
-        # Histories.
-
-        # Positions.
 
         # Status indicator.
         self.is_locked = False
@@ -92,30 +74,6 @@ class AgentCls(MetaCls):
         # Set attribute.
         self.attr['endo'][which] = attr
 
-    def _derived_attributes(self):
-        """ Calculate derived attributes.
-        """
-        # Antibugging
-        assert (self.get_status() is True)
-
-        # Choice characteristics
-        self.attr['exog']['choice'] = np.concatenate((self.attr['exog'][
-                        'outcome'], self.attr['exog']['cost']))
-
-
-        # Choice
-        coeffs_choice = self.attr['coeffs']['treated'] - \
-                        self.attr['coeffs']['untreated']
-
-        coeffs_choice = np.concatenate((coeffs_choice, - self.attr['coeffs']['cost']))
-
-        self.attr['coeffs']['choice'] = coeffs_choice
-
-        # Standard deviations
-        self.attr['sds']['treated'] = np.sqrt(self.attr['vars']['treated'])
-        self.attr['sds']['untreated'] = np.sqrt(self.attr['vars']['untreated'])
-        self.attr['sds']['cost'] = np.sqrt(self.attr['vars']['cost'])
-
     def set_economic_environment(self, init_dict):
         """ Method that allows to set the parametrization of the agent's
             economic environment.
@@ -140,11 +98,11 @@ class AgentCls(MetaCls):
         self.attr['rhos']['treated'] = init_dict['RHO']['treated']
         self.attr['rhos']['untreated'] = init_dict['RHO']['untreated']
 
+    ''' Private methods '''
 
     def _calculate_individual_likelihood(self):
         """ Method that calculates the individual likelihood.
         """
-
         # Distribute endogenous characteristics
         y = self.attr['endo']['outcome']
         d = self.attr['endo']['choice']
@@ -170,7 +128,6 @@ class AgentCls(MetaCls):
             var_u = self.attr['vars']['untreated']
             sd_u = self.attr['sds']['untreated']
 
-
         arg_one = (y - np.dot(coeffs_outcome, x)) / sd_u
         arg_two = (np.dot(coeffs_choice, g) - rho * sd_v * arg_one) / \
                   np.sqrt((1.0 - rho ** 2) * var_v)
@@ -185,4 +142,25 @@ class AgentCls(MetaCls):
         # Finishing
         return contrib
 
-    ''' Private methods '''
+    def _derived_attributes(self):
+        """ Calculate derived attributes.
+        """
+        # Antibugging
+        assert (self.get_status() is True)
+
+        # Choice characteristics
+        self.attr['exog']['choice'] = np.concatenate((self.attr['exog'][
+                        'outcome'], self.attr['exog']['cost']))
+
+        # Choice
+        coeffs_choice = self.attr['coeffs']['treated'] - \
+                        self.attr['coeffs']['untreated']
+
+        coeffs_choice = np.concatenate((coeffs_choice, - self.attr['coeffs']['cost']))
+
+        self.attr['coeffs']['choice'] = coeffs_choice
+
+        # Standard deviations
+        self.attr['sds']['treated'] = np.sqrt(self.attr['vars']['treated'])
+        self.attr['sds']['untreated'] = np.sqrt(self.attr['vars']['untreated'])
+        self.attr['sds']['cost'] = np.sqrt(self.attr['vars']['cost'])
