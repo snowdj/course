@@ -128,7 +128,7 @@ def integrity_checks(str_, *args):
 
         rslt, = args
 
-        assert (isinstance(rslt, list))
+        assert (isinstance(rslt, dict))
         assert (np.all(rslt > 0))
 
     else:
