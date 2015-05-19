@@ -37,7 +37,7 @@ debug.py</FONT>
  
         arg_one = (Y[i] - np.dot(coeffs, X[i, :])) / sd 
         arg_two = (choice_idx[i] - rho * V_sd * arg_one) / \ 
-                  np.sqrt((</span><span class="s3">1.0 </span><span class="s1">- rho ** </span><span class="s3">2</span><span class="s1">) * V_var) 
+                  np.sqrt((</span><span class="s3">1.0 </span><span class="s1">- rho ** </span><span class="s3">2</span><span class="s1">) * V_sd**2) 
  
         pdf_evals, cdf_evals = norm.pdf(arg_one), norm.cdf(arg_two) 
  
@@ -60,9 +60,9 @@ debug.py</FONT>
              (</span><span class="s3">1 </span><span class="s1">- D) * (Y - np.dot(Y0_coeffs, X.T)) / U0_sd 
  
     arg_two = D * (choice_idx - V_sd * U1V_rho * arg_one) / np.sqrt( 
-        (</span><span class="s3">1.0 </span><span class="s1">- U1V_rho ** </span><span class="s3">2</span><span class="s1">) * V_var) + \ 
+        (</span><span class="s3">1.0 </span><span class="s1">- U1V_rho ** </span><span class="s3">2</span><span class="s1">) * V_sd**2) + \ 
         (</span><span class="s3">1 </span><span class="s1">- D) * (choice_idx - V_sd * U0V_rho * arg_one) / np.sqrt( 
-                 (</span><span class="s3">1.0 </span><span class="s1">- U0V_rho ** </span><span class="s3">2</span><span class="s1">) * V_var) 
+                 (</span><span class="s3">1.0 </span><span class="s1">- U0V_rho ** </span><span class="s3">2</span><span class="s1">) * V_sd**2) 
  
     pdf_evals, cdf_evals = norm.pdf(arg_one), norm.cdf(arg_two) 
  

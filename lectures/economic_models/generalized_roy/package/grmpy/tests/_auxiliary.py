@@ -40,17 +40,17 @@ def random_init(seed=None):
 
     init_dict['BASICS']['agents'] = np.random.random_integers(1, MAX_AGENTS)
 
-    init_dict['BASICS']['file'] = id_generator()
+    init_dict['BASICS']['source'] = id_generator()
 
     # Correlation of unobservables
-    init_dict['RHO'] = dict()
+    init_dict['DIST'] = dict()
 
-    for group in ['treated', 'untreated']:
-        init_dict['RHO'][group] = np.random.uniform(-0.5, 0.5)
+    for group in ['rho0', 'rho1']:
+        init_dict['DIST'][group] = np.random.uniform(-0.5, 0.5)
 
     # Estimation details
     init_dict['ESTIMATION'] = dict()
-    init_dict['ESTIMATION']['optimizer'] = np.random.choice(['bfgs', 'nm'])
+    init_dict['ESTIMATION']['algorithm'] = np.random.choice(['bfgs', 'nm'])
     init_dict['ESTIMATION']['start'] = np.random.choice(['random', 'init'])
     init_dict['ESTIMATION']['version'] = np.random.choice(['slow', 'fast',
                                                            'object'])
@@ -63,7 +63,7 @@ def random_init(seed=None):
 
     for key_ in ['TREATED', 'UNTREATED', 'COST']:
         init_dict[key_] = dict()
-        init_dict[key_]['var'] = np.random.uniform(0.1, 0.5)
+        init_dict[key_]['sd'] = np.random.uniform(0.1, 0.5)
 
         if key_ not in ['COST']:
             init_dict[key_]['int'] = np.random.uniform(-0.5, 0.5)

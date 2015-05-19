@@ -26,7 +26,7 @@ def estimate(init_dict):
     start = init_dict['ESTIMATION']['start']
     maxiter = init_dict['ESTIMATION']['maxiter']
 
-    optimizer = init_dict['ESTIMATION']['optimizer']
+    optimizer = init_dict['ESTIMATION']['algorithm']
     version = init_dict['ESTIMATION']['version']
     num_covars_out = init_dict['AUX']['num_covars_out']
 
@@ -102,21 +102,21 @@ def _distribute_parameters(x, init_dict, num_covars_out):
     rslt['TREATED'] = dict()
     rslt['UNTREATED'] = dict()
     rslt['COST'] = dict()
-    rslt['RHO'] = dict()
+    rslt['DIST'] = dict()
 
     # Distribute parameters
     rslt['TREATED']['all'] = x[:num_covars_out]
     rslt['UNTREATED']['all'] = x[num_covars_out:(2 * num_covars_out)]
 
     rslt['COST']['all'] = x[(2 * num_covars_out):(-4)]
-    rslt['COST']['var'] = init_dict['COST']['var']
+    rslt['COST']['sd'] = init_dict['COST']['sd']
 
 
-    rslt['TREATED']['var'] = np.exp(x[(-4)])
-    rslt['UNTREATED']['var'] = np.exp(x[(-3)])
+    rslt['TREATED']['sd'] = np.exp(x[(-4)])
+    rslt['UNTREATED']['sd'] = np.exp(x[(-3)])
 
-    rslt['RHO']['treated'] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-2])))
-    rslt['RHO']['untreated'] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-1])))
+    rslt['DIST']['rho1'] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-2])))
+    rslt['DIST']['rho0'] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-1])))
 
     # Update auxiliary versions
     rslt['AUX'] = dict()
@@ -203,8 +203,8 @@ def _slow_negative_log_likelihood(args, Y, D, X, Z):
     """ Negative Log-likelihood function of the generalized Roy model.
     """
     # Distribute arguments
-    Y1_coeffs, Y0_coeffs, C_coeffs, choice_coeffs, U1_var, U0_var, U1V_rho, \
-    U0V_rho, V_var, U1_sd, U0_sd, V_sd = _distribute_arguments(args)
+    Y1_coeffs, Y0_coeffs, C_coeffs, choice_coeffs, U1_sd, U0_sd, U1V_rho, \
+    U0V_rho, V_sd = _distribute_arguments(args)
 
     # Auxiliary objects
     num_agents = Y.shape[0]
@@ -228,7 +228,7 @@ def _slow_negative_log_likelihood(args, Y, D, X, Z):
 
         arg_one = (Y[i] - np.dot(coeffs, X[i, :])) / sd
         arg_two = (choice_idx[i] - rho * V_sd * arg_one) / \
-                  np.sqrt((1.0 - rho ** 2) * V_var)
+                  np.sqrt((1.0 - rho ** 2) * V_sd**2)
 
         pdf_evals, cdf_evals = norm.pdf(arg_one), norm.cdf(arg_two)
 
@@ -254,8 +254,8 @@ def _fast_negative_log_likelihood(args, Y, D, X, Z):
     """ Negative Log-likelihood function of the Generalized Roy Model.
     """
     # Distribute arguments
-    Y1_coeffs, Y0_coeffs, C_coeffs, choice_coeffs, U1_var, U0_var, U1V_rho, \
-    U0V_rho, V_var, U1_sd, U0_sd, V_sd = _distribute_arguments(args)
+    Y1_coeffs, Y0_coeffs, C_coeffs, choice_coeffs, U1_sd, U0_sd, U1V_rho, \
+    U0V_rho, V_sd = _distribute_arguments(args)
 
     # Likelihood construction.
     G = np.concatenate((X, Z), axis=1)
@@ -265,9 +265,9 @@ def _fast_negative_log_likelihood(args, Y, D, X, Z):
              (1 - D) * (Y - np.dot(Y0_coeffs, X.T)) / U0_sd
 
     arg_two = D * (choice_idx - V_sd * U1V_rho * arg_one) / np.sqrt(
-        (1.0 - U1V_rho ** 2) * V_var) + \
+        (1.0 - U1V_rho ** 2) * V_sd**2) + \
         (1 - D) * (choice_idx - V_sd * U0V_rho * arg_one) / np.sqrt(
-                 (1.0 - U0V_rho ** 2) * V_var)
+                 (1.0 - U0V_rho ** 2) * V_sd**2)
 
     pdf_evals, cdf_evals = norm.pdf(arg_one), norm.cdf(arg_two)
 
@@ -296,7 +296,7 @@ def _load_data(init_dict):
     is_object = (init_dict['ESTIMATION']['version'] == 'object')
 
     # Read dataset
-    data = np.genfromtxt(init_dict['BASICS']['file'])
+    data = np.genfromtxt(init_dict['BASICS']['source'])
 
     # Reshaping, this ensure that the program also runs with just one agent
     # as otherwise only an vector is created. This creates problems for the
@@ -413,19 +413,15 @@ def _distribute_arguments(args):
 
     C_coeffs = np.array(args['COST']['all'])
 
-    U1_var = args['TREATED']['var']
-    U0_var = args['UNTREATED']['var']
+    U1_sd = args['TREATED']['sd']
+    U0_sd = args['UNTREATED']['sd']
 
-    U1V_rho = args['RHO']['treated']
-    U0V_rho = args['RHO']['untreated']
-    V_var = args['COST']['var']
-
-    U1_sd = np.sqrt(U1_var)
-    U0_sd = np.sqrt(U0_var)
-    V_sd = np.sqrt(V_var)
+    U1V_rho = args['DIST']['rho1']
+    U0V_rho = args['DIST']['rho0']
+    V_sd = args['COST']['sd']
 
     choice_coeffs = np.concatenate((Y1_coeffs - Y0_coeffs, - C_coeffs))
 
     # Finishing
-    return Y1_coeffs, Y0_coeffs, C_coeffs, choice_coeffs, U1_var, U0_var, \
-           U1V_rho, U0V_rho, V_var, U1_sd, U0_sd, V_sd
+    return Y1_coeffs, Y0_coeffs, C_coeffs, choice_coeffs, U1_sd, U0_sd, \
+           U1V_rho, U0V_rho, V_sd

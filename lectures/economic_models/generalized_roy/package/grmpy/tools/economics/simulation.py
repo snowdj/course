@@ -23,24 +23,24 @@ def simulate(init_dict, unobserved=False):
 
     # Distribute information
     num_agents = init_dict['BASICS']['agents']
-    file_name = init_dict['BASICS']['file']
+    source = init_dict['BASICS']['source']
 
     Y1_coeffs = init_dict['TREATED']['all']
     Y0_coeffs = init_dict['UNTREATED']['all']
 
     C_coeffs = np.array(init_dict['COST']['coeff'])
 
-    U1_var = init_dict['TREATED']['var']
-    U0_var = init_dict['UNTREATED']['var']
+    U1_sd = init_dict['TREATED']['sd']
+    U0_sd = init_dict['UNTREATED']['sd']
 
-    V_var = init_dict['COST']['var']
+    V_sd = init_dict['COST']['sd']
 
-    U1V_rho = init_dict['RHO']['treated']
-    U0V_rho = init_dict['RHO']['untreated']
+    U1V_rho = init_dict['DIST']['rho1']
+    U0V_rho = init_dict['DIST']['rho0']
 
     # Auxiliary objects
-    U1V_cov = U1V_rho * np.sqrt(U1_var) * np.sqrt(V_var)
-    U0V_cov = U0V_rho * np.sqrt(U0_var) * np.sqrt(V_var)
+    U1V_cov = U1V_rho * U1_sd * V_sd
+    U0V_cov = U0V_rho * U0_sd * V_sd
 
     num_covars_out = Y1_coeffs.shape[0]
     num_covars_cost = C_coeffs.shape[0]
@@ -64,7 +64,7 @@ def simulate(init_dict, unobserved=False):
 
     # Simulate unobservables
     means = np.tile(0.0, 3)
-    vars_ = [U1_var, U0_var, V_var]
+    vars_ = [U1_sd**2, U0_sd**2, V_sd**2]
     covs = np.diag(vars_)
 
     covs[0, 2] = U1V_cov
@@ -108,7 +108,7 @@ def simulate(init_dict, unobserved=False):
     _check_integrity_simulate(Y1, Y0, Y, D)
 
     # Save to disk
-    _write_out(Y, D, X, Z, file_name, unobserved, Y1, Y0)
+    _write_out(Y, D, X, Z, source, unobserved, Y1, Y0)
 
     # Return selected features of data
     return Y1, Y0, D
@@ -137,18 +137,18 @@ def _check_integrity_simulate(Y1, Y0, Y, D):
     assert (D.all() in [1.0, 0.0])
 
 
-def _write_out(Y, D, X, Z, file_name, unobserved=False, Y1=None, Y0=None):
+def _write_out(Y, D, X, Z, source, unobserved=False, Y1=None, Y0=None):
     """ Write out simulated data to file.
     """
 
     if not unobserved:
 
-        np.savetxt(file_name, np.column_stack((Y, D, X, Z)), fmt='%8.3f')
+        np.savetxt(source, np.column_stack((Y, D, X, Z)), fmt='%8.3f')
 
     else:
 
         assert (isinstance(Y1, np.ndarray))
         assert (isinstance(Y0, np.ndarray))
 
-        np.savetxt(file_name, np.column_stack((Y, D, X, Z, Y1, Y0)),
+        np.savetxt(source, np.column_stack((Y, D, X, Z, Y1, Y0)),
                    fmt='%8.3f')

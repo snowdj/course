@@ -11,9 +11,8 @@ import numpy as np
 
 
 def process(file_):
-    """ This function reads the init.ini file.
+    """ Process initialization file.
     """
-
     # Initialization
     dict_ = {}
 
@@ -33,28 +32,14 @@ def process(file_):
             dict_[keyword] = {}
             continue
 
-        # Distribute information
-        name, val = list_[0], list_[1]
+        if keyword not in ['BENE']:
+            dict_ = _process_not_bene(list_, dict_, keyword)
 
-        # Prepare container.
-        if name not in dict_[keyword].keys():
-
-            if name in ['coeff']:
-                dict_[keyword][name] = []
-
-        # Type conversion
-        if name in ['agents', 'maxiter']:
-            val = int(val)
-        elif name in ['file', 'optimizer', 'start', 'version']:
-            val = str(val)
         else:
-            val = float(val)
+            dict_ = _process_bene(list_, dict_, keyword)
 
-        # Collect information
-        if name in ['coeff']:
-            dict_[keyword][name] += [val]
-        else:
-            dict_[keyword][name] = val
+    # Remove BENE
+    del dict_['BENE']
 
     # Add auxiliary objects
     dict_ = _add_auxiliary(dict_)
@@ -66,10 +51,72 @@ def process(file_):
     return dict_
 
 
+
 ''' Auxiliary functions '''
 # Note that the name of all auxiliary functions starts with an underscore.
 # This ensures that the function is private to the module. A standard import
 # of this module will not make this function available.
+
+
+def _process_bene(list_, dict_, keyword):
+    """ This function processes the BENE part of the initialization file.
+    """
+    # Distribute information
+    name, val_treated, val_untreated = list_[0], list_[1], list_[2]
+
+    # Initialize dictionary
+    if 'TREATED' not in dict_.keys():
+        for subgroup in ['TREATED', 'UNTREATED']:
+            dict_[subgroup] = {}
+            dict_[subgroup]['coeff'] = []
+            dict_[subgroup]['int'] = None
+            dict_[subgroup]['sd'] = None
+
+    # Type conversion
+    val_treated = float(val_treated)
+    val_untreated = float(val_untreated)
+
+    # Collect information
+    if name in ['coeff']:
+        dict_['TREATED'][name] += [val_treated]
+        dict_['UNTREATED'][name] += [val_untreated]
+    else:
+        dict_['TREATED'][name] = val_treated
+        dict_['UNTREATED'][name] = val_untreated
+
+    # Finishing
+    return dict_
+
+
+def _process_not_bene(list_, dict_, keyword):
+    """ This function processes all of the initialization file, but the
+        BENE section.
+    """
+    # Distribute information
+    name, val = list_[0], list_[1]
+
+    # Prepare container.
+    if name not in dict_[keyword].keys():
+        if name in ['coeff']:
+            dict_[keyword][name] = []
+
+    # Type conversion
+    if name in ['agents', 'maxiter']:
+        val = int(val)
+    elif name in ['source', 'algorithm', 'start', 'version']:
+        val = str(val)
+    else:
+        val = float(val)
+
+    # Collect information
+    if name in ['coeff']:
+        dict_[keyword][name] += [val]
+    else:
+        dict_[keyword][name] = val
+
+    # Finishing.
+    return dict_
+
 
 def _check_integrity_process(dict_):
     """ Check integrity of initFile dict.
@@ -82,16 +129,13 @@ def _check_integrity_process(dict_):
     assert (isinstance(dict_['BASICS']['agents'], int))
 
     # Check optimizer
-    assert (dict_['ESTIMATION']['optimizer'] in ['bfgs', 'nm'])
+    assert (dict_['ESTIMATION']['algorithm'] in ['bfgs', 'nm'])
 
     # Check starting values
     assert (dict_['ESTIMATION']['start'] in ['random', 'init'])
 
     # Maximum iterations
     assert (dict_['ESTIMATION']['maxiter'] >= 0)
-
-    # Implementations
-    assert (dict_['ESTIMATION']['version'] in ['fast', 'slow', 'object'])
 
     # Finishing
     return True
@@ -134,10 +178,10 @@ def _add_auxiliary(dict_):
     dict_['AUX']['init_values'] += [dict_['UNTREATED']['int']]
     dict_['AUX']['init_values'] += dict_['UNTREATED']['coeff']
     dict_['AUX']['init_values'] += dict_['COST']['coeff']
-    dict_['AUX']['init_values'] += [dict_['TREATED']['var']]
-    dict_['AUX']['init_values'] += [dict_['UNTREATED']['var']]
-    dict_['AUX']['init_values'] += [dict_['RHO']['treated']]
-    dict_['AUX']['init_values'] += [dict_['RHO']['untreated']]
+    dict_['AUX']['init_values'] += [dict_['TREATED']['sd']]
+    dict_['AUX']['init_values'] += [dict_['UNTREATED']['sd']]
+    dict_['AUX']['init_values'] += [dict_['DIST']['rho1']]
+    dict_['AUX']['init_values'] += [dict_['DIST']['rho0']]
 
     # Finishing
     return dict_

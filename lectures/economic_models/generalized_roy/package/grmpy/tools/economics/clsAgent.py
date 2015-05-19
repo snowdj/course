@@ -32,12 +32,6 @@ class AgentCls(MetaCls):
         self.attr['coeffs']['cost'] = None
         self.attr['coeffs']['choice'] = None
 
-        # Variances
-        self.attr['vars'] = {}
-        self.attr['vars']['treated'] = None
-        self.attr['vars']['untreated'] = None
-        self.attr['vars']['cost'] = None
-
         # Standard deviations
         self.attr['sds'] = {}
         self.attr['sds']['treated'] = None
@@ -90,13 +84,13 @@ class AgentCls(MetaCls):
         self.attr['coeffs']['cost'] = init_dict['COST']['all']
 
         # Variances
-        self.attr['vars']['treated'] = init_dict['TREATED']['var']
-        self.attr['vars']['untreated'] = init_dict['UNTREATED']['var']
-        self.attr['vars']['cost'] = init_dict['COST']['var']
+        self.attr['sds']['treated'] = init_dict['TREATED']['sd']
+        self.attr['sds']['untreated'] = init_dict['UNTREATED']['sd']
+        self.attr['sds']['cost'] = init_dict['COST']['sd']
 
         # Correlations
-        self.attr['rhos']['treated'] = init_dict['RHO']['treated']
-        self.attr['rhos']['untreated'] = init_dict['RHO']['untreated']
+        self.attr['rhos']['treated'] = init_dict['DIST']['rho1']
+        self.attr['rhos']['untreated'] = init_dict['DIST']['rho0']
 
     ''' Private methods '''
 
@@ -114,23 +108,20 @@ class AgentCls(MetaCls):
 
         # Select relevant economic environment
         coeffs_choice = self.attr['coeffs']['choice']
-        var_v = self.attr['vars']['cost']
         sd_v = self.attr['sds']['cost']
 
         if d == 1:
             coeffs_outcome = self.attr['coeffs']['treated']
             rho = self.attr['rhos']['treated']
-            var_u = self.attr['vars']['treated']
             sd_u = self.attr['sds']['treated']
         else:
             coeffs_outcome = self.attr['coeffs']['untreated']
             rho = self.attr['rhos']['untreated']
-            var_u = self.attr['vars']['untreated']
             sd_u = self.attr['sds']['untreated']
 
         arg_one = (y - np.dot(coeffs_outcome, x)) / sd_u
         arg_two = (np.dot(coeffs_choice, g) - rho * sd_v * arg_one) / \
-                  np.sqrt((1.0 - rho ** 2) * var_v)
+                  np.sqrt((1.0 - rho ** 2) * sd_v**2)
 
         pdf_evals, cdf_evals = norm.pdf(arg_one), norm.cdf(arg_two)
 
@@ -160,7 +151,3 @@ class AgentCls(MetaCls):
 
         self.attr['coeffs']['choice'] = coeffs_choice
 
-        # Standard deviations
-        self.attr['sds']['treated'] = np.sqrt(self.attr['vars']['treated'])
-        self.attr['sds']['untreated'] = np.sqrt(self.attr['vars']['untreated'])
-        self.attr['sds']['cost'] = np.sqrt(self.attr['vars']['cost'])

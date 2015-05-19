@@ -13,14 +13,12 @@ import numpy as np
 from scipy.stats import norm
 from scipy.optimize import minimize
 
-
 ''' Process '''
 
 
 def process(file_):
-    """ This function reads the init.ini file.
+    """ Process initialization file.
     """
-
     # Initialization
     dict_ = {}
 
@@ -40,34 +38,80 @@ def process(file_):
             dict_[keyword] = {}
             continue
 
-        # Distribute information
-        name, val = list_[0], list_[1]
+        if keyword not in ['BENE']:
+            dict_ = _process_not_bene(list_, dict_, keyword)
 
-        # Prepare container.
-        if name not in dict_[keyword].keys():
-
-            if name in ['coeff']:
-                dict_[keyword][name] = []
-
-        # Type conversion
-        if name in ['agents', 'maxiter']:
-            val = int(val)
-        elif name in ['file', 'optimizer', 'start', 'version']:
-            val = str(val)
         else:
-            val = float(val)
+            dict_ = _process_bene(list_, dict_, keyword)
 
-        # Collect information
-        if name in ['coeff']:
-            dict_[keyword][name] += [val]
-        else:
-            dict_[keyword][name] = val
+    # Remove BENE
+    del dict_['BENE']
 
     # Add auxiliary objects
     dict_ = _add_auxiliary(dict_)
 
     # Check quality.
     _check_integrity_process(dict_)
+
+    # Finishing.
+    return dict_
+
+
+def _process_bene(list_, dict_, keyword):
+    """ This function processes the BENE part of the initialization file.
+    """
+    # Distribute information
+    name, val_treated, val_untreated = list_[0], list_[1], list_[2]
+
+    # Initialize dictionary
+    if 'TREATED' not in dict_.keys():
+        for subgroup in ['TREATED', 'UNTREATED']:
+            dict_[subgroup] = {}
+            dict_[subgroup]['coeff'] = []
+            dict_[subgroup]['int'] = None
+            dict_[subgroup]['sd'] = None
+
+    # Type conversion
+    val_treated = float(val_treated)
+    val_untreated = float(val_untreated)
+
+    # Collect information
+    if name in ['coeff']:
+        dict_['TREATED'][name] += [val_treated]
+        dict_['UNTREATED'][name] += [val_untreated]
+    else:
+        dict_['TREATED'][name] = val_treated
+        dict_['UNTREATED'][name] = val_untreated
+
+    # Finishing
+    return dict_
+
+
+def _process_not_bene(list_, dict_, keyword):
+    """ This function processes all of the initialization file, but the
+        BENE section.
+    """
+    # Distribute information
+    name, val = list_[0], list_[1]
+
+    # Prepare container.
+    if name not in dict_[keyword].keys():
+        if name in ['coeff']:
+            dict_[keyword][name] = []
+
+    # Type conversion
+    if name in ['agents', 'maxiter']:
+        val = int(val)
+    elif name in ['source', 'algorithm', 'start', 'version']:
+        val = str(val)
+    else:
+        val = float(val)
+
+    # Collect information
+    if name in ['coeff']:
+        dict_[keyword][name] += [val]
+    else:
+        dict_[keyword][name] = val
 
     # Finishing.
     return dict_
@@ -84,7 +128,7 @@ def _check_integrity_process(dict_):
     assert (isinstance(dict_['BASICS']['agents'], int))
 
     # Check optimizer
-    assert (dict_['ESTIMATION']['optimizer'] in ['bfgs', 'nm'])
+    assert (dict_['ESTIMATION']['algorithm'] in ['bfgs', 'nm'])
 
     # Check starting values
     assert (dict_['ESTIMATION']['start'] in ['random', 'init'])
@@ -133,10 +177,10 @@ def _add_auxiliary(dict_):
     dict_['AUX']['init_values'] += [dict_['UNTREATED']['int']]
     dict_['AUX']['init_values'] += dict_['UNTREATED']['coeff']
     dict_['AUX']['init_values'] += dict_['COST']['coeff']
-    dict_['AUX']['init_values'] += [dict_['TREATED']['var']]
-    dict_['AUX']['init_values'] += [dict_['UNTREATED']['var']]
-    dict_['AUX']['init_values'] += [dict_['RHO']['treated']]
-    dict_['AUX']['init_values'] += [dict_['RHO']['untreated']]
+    dict_['AUX']['init_values'] += [dict_['TREATED']['sd']]
+    dict_['AUX']['init_values'] += [dict_['UNTREATED']['sd']]
+    dict_['AUX']['init_values'] += [dict_['DIST']['rho1']]
+    dict_['AUX']['init_values'] += [dict_['DIST']['rho0']]
 
     # Finishing
     return dict_
@@ -164,6 +208,7 @@ def _process_cases(list_):
     # Finishing
     return is_empty, is_keyword
 
+
 ''' Simulate '''
 
 
@@ -180,24 +225,24 @@ def simulate(init_dict, unobserved=False):
 
     # Distribute information
     num_agents = init_dict['BASICS']['agents']
-    file_name = init_dict['BASICS']['file']
+    source = init_dict['BASICS']['source']
 
     Y1_coeffs = init_dict['TREATED']['all']
     Y0_coeffs = init_dict['UNTREATED']['all']
 
     C_coeffs = np.array(init_dict['COST']['coeff'])
 
-    U1_var = init_dict['TREATED']['var']
-    U0_var = init_dict['UNTREATED']['var']
+    U1_sd = init_dict['TREATED']['sd']
+    U0_sd = init_dict['UNTREATED']['sd']
 
-    V_var = init_dict['COST']['var']
+    V_sd = init_dict['COST']['sd']
 
-    U1V_rho = init_dict['RHO']['treated']
-    U0V_rho = init_dict['RHO']['untreated']
+    U1V_rho = init_dict['DIST']['rho1']
+    U0V_rho = init_dict['DIST']['rho0']
 
     # Auxiliary objects
-    U1V_cov = U1V_rho * np.sqrt(U1_var) * np.sqrt(V_var)
-    U0V_cov = U0V_rho * np.sqrt(U0_var) * np.sqrt(V_var)
+    U1V_cov = U1V_rho * U1_sd * V_sd
+    U0V_cov = U0V_rho * U0_sd * V_sd
 
     num_covars_out = Y1_coeffs.shape[0]
     num_covars_cost = C_coeffs.shape[0]
@@ -221,7 +266,7 @@ def simulate(init_dict, unobserved=False):
 
     # Simulate unobservables
     means = np.tile(0.0, 3)
-    vars_ = [U1_var, U0_var, V_var]
+    vars_ = [U1_sd ** 2, U0_sd ** 2, V_sd ** 2]
     covs = np.diag(vars_)
 
     covs[0, 2] = U1V_cov
@@ -240,7 +285,6 @@ def simulate(init_dict, unobserved=False):
     D = np.tile(np.nan, num_agents)
 
     for i in range(num_agents):
-
         # Select individual unobservables and observables
         u1, u0, v = U[i, 0], U[i, 1], U[i, 2]
 
@@ -265,7 +309,7 @@ def simulate(init_dict, unobserved=False):
     _check_integrity_simulate(Y1, Y0, Y, D)
 
     # Save to disk
-    _write_out(Y, D, X, Z, file_name, unobserved, Y1, Y0)
+    _write_out(Y, D, X, Z, source, unobserved, Y1, Y0)
 
     # Return selected features of data
     return Y1, Y0, D
@@ -289,24 +333,23 @@ def _check_integrity_simulate(Y1, Y0, Y, D):
     assert (D.all() in [1.0, 0.0])
 
 
-def _write_out(Y, D, X, Z, file_name, unobserved=False, Y1=None, Y0=None):
+def _write_out(Y, D, X, Z, source, unobserved=False, Y1=None, Y0=None):
     """ Write out simulated data to file.
     """
 
     if not unobserved:
 
-        np.savetxt(file_name, np.column_stack((Y, D, X, Z)), fmt='%8.3f')
+        np.savetxt(source, np.column_stack((Y, D, X, Z)), fmt='%8.3f')
 
     else:
 
         assert (isinstance(Y1, np.ndarray))
         assert (isinstance(Y0, np.ndarray))
 
-        np.savetxt(file_name, np.column_stack((Y, D, X, Z, Y1, Y0)),
-                   fmt='%8.3f')\
+        np.savetxt(source, np.column_stack((Y, D, X, Z, Y1, Y0)),
+                   fmt='%8.3f')
 
-
-''' Estimate '''
+    ''' Estimate '''
 
 
 def estimate(init_dict):
@@ -322,7 +365,7 @@ def estimate(init_dict):
     start = init_dict['ESTIMATION']['start']
     maxiter = init_dict['ESTIMATION']['maxiter']
 
-    optimizer = init_dict['ESTIMATION']['optimizer']
+    optimizer = init_dict['ESTIMATION']['algorithm']
     num_covars_out = init_dict['AUX']['num_covars_out']
 
     # Initialize different starting values
@@ -390,21 +433,20 @@ def _distribute_parameters(x, init_dict, num_covars_out):
     rslt['TREATED'] = dict()
     rslt['UNTREATED'] = dict()
     rslt['COST'] = dict()
-    rslt['RHO'] = dict()
+    rslt['DIST'] = dict()
 
     # Distribute parameters
     rslt['TREATED']['all'] = x[:num_covars_out]
     rslt['UNTREATED']['all'] = x[num_covars_out:(2 * num_covars_out)]
 
     rslt['COST']['all'] = x[(2 * num_covars_out):(-4)]
-    rslt['COST']['var'] = init_dict['COST']['var']
+    rslt['COST']['sd'] = init_dict['COST']['sd']
 
+    rslt['TREATED']['sd'] = np.exp(x[(-4)])
+    rslt['UNTREATED']['sd'] = np.exp(x[(-3)])
 
-    rslt['TREATED']['var'] = np.exp(x[(-4)])
-    rslt['UNTREATED']['var'] = np.exp(x[(-3)])
-
-    rslt['RHO']['treated'] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-2])))
-    rslt['RHO']['untreated'] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-1])))
+    rslt['DIST']['rho1'] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-2])))
+    rslt['DIST']['rho0'] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-1])))
 
     # Update auxiliary versions
     rslt['AUX'] = dict()
@@ -419,7 +461,7 @@ def _distribute_parameters(x, init_dict, num_covars_out):
     return rslt
 
 
-def _max_interface(x, Y, D, X, Z,init_dict):
+def _max_interface(x, Y, D, X, Z, init_dict):
     """ Interface to the SciPy maximization routines.
     """
     # Auxiliary objects
@@ -443,18 +485,13 @@ def _negative_log_likelihood(args, Y, D, X, Z):
     Y0_coeffs = np.array(args['UNTREATED']['all'])
     C_coeffs = np.array(args['COST']['all'])
 
-    U1_var = args['TREATED']['var']
-    U0_var = args['UNTREATED']['var']
+    U1_sd = args['TREATED']['sd']
+    U0_sd = args['UNTREATED']['sd']
 
-    var_V = args['COST']['var']
+    V_sd = args['COST']['sd']
 
-    U1V_rho = args['RHO']['treated']
-    U0V_rho = args['RHO']['untreated']
-
-    # Auxiliary objects.
-    U1_sd = np.sqrt(U1_var)
-    U0_sd = np.sqrt(U0_var)
-    V_sd = np.sqrt(var_V)
+    U1V_rho = args['DIST']['rho1']
+    U0V_rho = args['DIST']['rho0']
 
     num_agents = Y.shape[0]
     choice_coeffs = np.concatenate((Y1_coeffs - Y0_coeffs, - C_coeffs))
@@ -478,7 +515,7 @@ def _negative_log_likelihood(args, Y, D, X, Z):
 
         arg_one = (Y[i] - np.dot(coeffs, X[i, :])) / sd
         arg_two = (choice_idx[i] - rho * V_sd * arg_one) / \
-                  np.sqrt((1.0 - rho ** 2) * var_V)
+                  np.sqrt((1.0 - rho ** 2) * V_sd ** 2)
 
         pdf_evals, cdf_evals = norm.pdf(arg_one), norm.cdf(arg_two)
 
@@ -509,7 +546,7 @@ def _load_data(init_dict):
     num_agents = init_dict['BASICS']['agents']
 
     # Read dataset
-    data = np.genfromtxt(init_dict['BASICS']['file'])
+    data = np.genfromtxt(init_dict['BASICS']['source'])
 
     # Reshaping, this ensure that the program also runs with just one agent
     # as otherwise only an vector is created. This creates problems for the
@@ -609,11 +646,10 @@ def inspect(rslt, init_dict):
             continue
 
         for subkey in rslt[key_].keys():
-
             modified_init[key_][subkey] = rslt[key_][subkey]
 
     # Modified dataset
-    modified_init['BASICS']['file'] = 'simulated.grm.txt'
+    modified_init['BASICS']['source'] = 'simulated.grm.txt'
 
     # Simulate from estimation results
     Y1, Y0, D = simulate(modified_init, True)
@@ -638,7 +674,6 @@ def inspect(rslt, init_dict):
         file_.write('\n Average Treatment Effects\n\n')
 
         for i, label in enumerate(['ATE', 'TT', 'TUT']):
-
             str_ = fmt.format(label, effects[i])
 
             file_.write(str_)
@@ -654,7 +689,5 @@ def inspect(rslt, init_dict):
         fmt = '{0:10.2f}{1:10.2f}\n'
 
         for i in range(num_paras):
-
             str_ = fmt.format(x0[i], x[i])
-
             file_.write(str_)
