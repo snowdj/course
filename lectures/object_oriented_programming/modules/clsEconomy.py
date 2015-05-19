@@ -36,20 +36,18 @@ class EconomyCls(object):
         # Distribute class attributes
         agent_objs = self.population
 
-        # Initialize result container
-        rslt = np.array([0.0, 0.0])
-
         # Loop over all agents in the population.
+        demand_x1 = []
+        demand_x2 = []
         for agent_obj in agent_objs:
 
             agent_obj.choose(p1, p2)
 
-            demand = agent_obj.get_individual_demand()
+            demand_x1.append(agent_obj.get_individual_demand()[0])
+            demand_x2.append(agent_obj.get_individual_demand()[1])
 
-            rslt += demand
-
-        # Type conversion
-        rslt = rslt.tolist()
+        # Record output
+        rslt = {'demand': [np.sum(demand_x1), np.sum(demand_x2)], 'sd': [np.std(demand_x1), np.std(demand_x2)]}
 
         # Quality Assurance
         integrity_checks('get_aggregate_demand_out', rslt)
