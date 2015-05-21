@@ -63,8 +63,9 @@ def random_init(seed=None):
 
     for key_ in ['TREATED', 'UNTREATED', 'COST']:
         init_dict[key_] = dict()
-        init_dict[key_]['sd'] = np.random.uniform(0.1, 0.5)
 
+        # Draw standard deviations and intercepts
+        init_dict[key_]['sd'] = np.random.uniform(0.1, 0.5)
         init_dict[key_]['int'] = np.random.uniform(-0.1, 0.1)
 
         num_coeffs = num_coeffs_out
