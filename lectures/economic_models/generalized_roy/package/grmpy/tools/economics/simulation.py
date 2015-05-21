@@ -28,7 +28,7 @@ def simulate(init_dict, unobserved=False):
     Y1_coeffs = init_dict['TREATED']['all']
     Y0_coeffs = init_dict['UNTREATED']['all']
 
-    C_coeffs = np.array(init_dict['COST']['coeff'])
+    C_coeffs = np.array(init_dict['COST']['all'])
 
     U1_sd = init_dict['TREATED']['sd']
     U0_sd = init_dict['UNTREATED']['sd']
@@ -50,12 +50,15 @@ def simulate(init_dict, unobserved=False):
     covs = np.identity(num_covars_out)
 
     X = np.random.multivariate_normal(means, covs, num_agents)
-    X[:, 0] = 1.0
 
     means = np.tile(0.0, num_covars_cost)
     covs = np.identity(num_covars_cost)
 
     Z = np.random.multivariate_normal(means, covs, num_agents)
+
+    # Add intercepts. The first column of the X and Z matrix always contains
+    # the intercept term. This is exploited throughout the code.
+    Z[:,0], X[:, 0] = 1.0, 1.0
 
     # Construct index of observable characteristics
     Y1_level = np.dot(Y1_coeffs, X.T)

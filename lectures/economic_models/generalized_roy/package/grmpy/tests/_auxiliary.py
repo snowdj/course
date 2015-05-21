@@ -65,8 +65,7 @@ def random_init(seed=None):
         init_dict[key_] = dict()
         init_dict[key_]['sd'] = np.random.uniform(0.1, 0.5)
 
-        if key_ not in ['COST']:
-            init_dict[key_]['int'] = np.random.uniform(-0.5, 0.5)
+        init_dict[key_]['int'] = np.random.uniform(-0.1, 0.1)
 
         num_coeffs = num_coeffs_out
 

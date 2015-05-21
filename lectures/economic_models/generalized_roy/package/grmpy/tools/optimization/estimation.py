@@ -111,7 +111,6 @@ def _distribute_parameters(x, init_dict, num_covars_out):
     rslt['COST']['all'] = x[(2 * num_covars_out):(-4)]
     rslt['COST']['sd'] = init_dict['COST']['sd']
 
-
     rslt['TREATED']['sd'] = np.exp(x[(-4)])
     rslt['UNTREATED']['sd'] = np.exp(x[(-3)])
 
@@ -216,12 +215,12 @@ def _slow_negative_log_likelihood(args, Y, D, X, Z):
     # Likelihood construction.
     for i in range(num_agents):
 
-        g = np.concatenate((X[i, :], Z[i, :]))
+        g = np.concatenate((X[i, :], Z[i, 1:]))
         choice_idx[i] = np.dot(choice_coeffs, g)
+
 
         # Select outcome information
         if D[i] == 1.00:
-
             coeffs, rho, sd = Y1_coeffs, U1V_rho, U1_sd
         else:
             coeffs, rho, sd = Y0_coeffs, U0V_rho, U0_sd
@@ -258,7 +257,7 @@ def _fast_negative_log_likelihood(args, Y, D, X, Z):
     U0V_rho, V_sd = _distribute_arguments(args)
 
     # Likelihood construction.
-    G = np.concatenate((X, Z), axis=1)
+    G = np.concatenate((X, Z[:,1:]), axis=1)
     choice_idx = np.dot(choice_coeffs, G.T)
 
     arg_one = D * (Y - np.dot(Y1_coeffs, X.T)) / U1_sd + \
@@ -420,7 +419,12 @@ def _distribute_arguments(args):
     U0V_rho = args['DIST']['rho0']
     V_sd = args['COST']['sd']
 
-    choice_coeffs = np.concatenate((Y1_coeffs - Y0_coeffs, - C_coeffs))
+    # Construct choice coefficients. Special care is required to ensure
+    # as an intercept is contained in the vectors for the benefits or
+    # costs.
+    int = [Y1_coeffs[0] - Y0_coeffs[0] - C_coeffs[0]]
+    coeffs = np.concatenate((Y1_coeffs[1:] - Y0_coeffs[1:], - C_coeffs[1:]))
+    choice_coeffs = np.concatenate((int, coeffs))
 
     # Finishing
     return Y1_coeffs, Y0_coeffs, C_coeffs, choice_coeffs, U1_sd, U0_sd, \

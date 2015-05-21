@@ -151,19 +151,14 @@ def _add_auxiliary(dict_):
     dict_['AUX'] = {}
 
     # Full set of coefficients.
-    dict_['TREATED']['all'] = [dict_['TREATED']['int']]
-    dict_['TREATED']['all'] += dict_['TREATED']['coeff']
-    dict_['TREATED']['all'] = np.array(dict_['TREATED']['all'])
-
-    dict_['UNTREATED']['all'] = [dict_['UNTREATED']['int']]
-    dict_['UNTREATED']['all'] += dict_['UNTREATED']['coeff']
-    dict_['UNTREATED']['all'] = np.array(dict_['UNTREATED']['all'])
-
-    dict_['COST']['all'] = np.array(dict_['COST']['coeff'])
+    for key_ in ['TREATED', 'UNTREATED', 'COST']:
+        dict_[key_]['all'] = [dict_[key_]['int']]
+        dict_[key_]['all'] += dict_[key_]['coeff']
+        dict_[key_]['all'] = np.array(dict_[key_]['all'])
 
     # Number of covariates
-    num_covars_out = len(dict_['TREATED']['coeff']) + 1
-    num_covars_cost = len(dict_['COST']['coeff'])
+    num_covars_out = len(dict_['TREATED']['all'])
+    num_covars_cost = len(dict_['COST']['all'])
 
     dict_['AUX']['num_covars_out'] = num_covars_out
     dict_['AUX']['num_covars_cost'] = num_covars_cost
@@ -173,11 +168,10 @@ def _add_auxiliary(dict_):
 
     # Starting values
     dict_['AUX']['init_values'] = []
-    dict_['AUX']['init_values'] += [dict_['TREATED']['int']]
-    dict_['AUX']['init_values'] += dict_['TREATED']['coeff']
-    dict_['AUX']['init_values'] += [dict_['UNTREATED']['int']]
-    dict_['AUX']['init_values'] += dict_['UNTREATED']['coeff']
-    dict_['AUX']['init_values'] += dict_['COST']['coeff']
+
+    for key_ in ['TREATED', 'UNTREATED', 'COST']:
+        dict_['AUX']['init_values'] += dict_[key_]['all'].tolist()
+
     dict_['AUX']['init_values'] += [dict_['TREATED']['sd']]
     dict_['AUX']['init_values'] += [dict_['UNTREATED']['sd']]
     dict_['AUX']['init_values'] += [dict_['DIST']['rho1']]
