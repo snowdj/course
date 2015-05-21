@@ -68,8 +68,8 @@ def random_init(seed=None):
         init_dict[key_]['sd'] = np.random.uniform(0.1, 0.5)
         init_dict[key_]['int'] = np.random.uniform(-0.1, 0.1)
 
+        # Draw coefficients
         num_coeffs = num_coeffs_out
-
         if key_ == 'COST':
             num_coeffs = num_coeffs_cost
 

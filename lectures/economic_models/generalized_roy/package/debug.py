@@ -26,6 +26,9 @@ import grmpy as gp
 # Hidden function
 from tests._auxiliary import random_init
 
+
+
+
 np.random.seed(123)
 # Generate random request
 init_dict = random_init()
