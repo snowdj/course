@@ -51,7 +51,8 @@ def random_init(seed=None):
     # Estimation details
     init_dict['ESTIMATION'] = dict()
     init_dict['ESTIMATION']['algorithm'] = np.random.choice(['bfgs', 'nm'])
-    init_dict['ESTIMATION']['start'] = np.random.choice(['random', 'init'])
+    init_dict['ESTIMATION']['start'] = np.random.choice(['random', 'init',
+                                                         'auto'])
     init_dict['ESTIMATION']['version'] = np.random.choice(['slow', 'fast',
                                                            'object'])
     init_dict['ESTIMATION']['maxiter'] = \

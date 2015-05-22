@@ -3,7 +3,9 @@
 """
 
 # standard library
+import sys
 import numpy as np
+import statsmodels.api  as sm
 from scipy.stats import norm
 from scipy.optimize import minimize
 
@@ -31,7 +33,7 @@ def estimate(init_dict):
     num_covars_out = init_dict['AUX']['num_covars_out']
 
     # Initialize different starting values
-    x0 = _get_start(start, init_dict)
+    x0 = _get_start(start, init_dict, Y, D, X, Z)
 
     # Select optimizer
     if optimizer == 'nm':
@@ -331,21 +333,22 @@ def _load_data(init_dict):
 
             agent_objs += [agent_obj]
 
-        # Clear data containers
-        Y, D, X, Z = None, None, None, None
-
     # Finishing
     return Y, D, X, Z, agent_objs
 
 
-def _get_start(which, init_dict):
+def _get_start(which, init_dict, Y, D, X, Z):
     """ Get different kind of starting values.
     """
     # Antibugging.
-    assert (which in ['random', 'init'])
+    assert (which in ['random', 'init', 'auto'])
 
     # Distribute auxiliary objects
     num_paras = init_dict['AUX']['num_paras']
+    num_covars_cost = init_dict['AUX']['num_covars_cost']
+
+    # Construct auxiliary objects
+    G = np.concatenate((X, Z[:, 1:]), axis=1)
 
     # Select relevant values.
     if which == 'random':
@@ -361,6 +364,39 @@ def _get_start(which, init_dict):
 
     elif which == 'init':
         x0 = np.array(init_dict['AUX']['init_values'][:])
+
+    elif which == 'auto':
+
+        # Subsetting
+        Y1, X1 = Y[D == 1], X[(D == 1), :]
+        olsRslt = sm.OLS(Y1, X1).fit()
+
+        # Extract results
+        coeffs_treated = olsRslt.params
+        sd_treated = np.array(np.sqrt(olsRslt.scale))
+
+        # Subsetting
+        Y0, X0 = Y[D == 0], X[(D == 0), :]
+        olsRslt = sm.OLS(Y0, X0).fit()
+
+        # Extract results
+        coeffs_untreated = olsRslt.params
+        sd_untreated = np.array(np.sqrt(olsRslt.scale))
+
+        # Estimate choice model
+        probitRslt = sm.Probit(D, G).fit()
+        sd = init_dict['COST']['sd']
+        coeffs = probitRslt.params*sd
+
+        # Special treatment of cost intercept
+        cost_int = coeffs_treated[0] - coeffs_untreated[0] - coeffs[0]
+
+        # Collect results
+        x0 = np.concatenate((coeffs_treated, coeffs_untreated))
+        x0 = np.concatenate((x0, [cost_int], -coeffs[-(num_covars_cost - 1):]))
+        x0 = np.concatenate((x0, [sd_treated, sd_untreated]))
+        x0 = np.concatenate((x0, [0.00, 0.00]))
+
     else:
         raise AssertionError
 

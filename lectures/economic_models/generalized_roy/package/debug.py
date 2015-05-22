@@ -28,19 +28,37 @@ from tests._auxiliary import random_init
 
 
 
+if False:
+
+    ## Generate random request
+    init_dict = random_init()
+    gp.simulate(init_dict)
+
+    # Estimate model
+    rslt = gp.estimate(init_dict)
+
+    # Check for convergence, which is very different from our
+    # notion of a SUCCESSFUL estimation run.
+    assert (rslt['success'] is True)
+
+
+    print rslt['fval']
+    assert np.abs(rslt['fval']- 0.734631068458) < 0.00001
 
 np.random.seed(123)
-# Generate random request
-init_dict = random_init()
-gp.simulate(init_dict)
+count = 0
+while True:
 
-# Estimate model
-rslt = gp.estimate(init_dict)
+    init_dict = random_init()
 
-# Check for convergence, which is very different from our
-# notion of a SUCCESSFUL estimation run.
-assert (rslt['success'] is True)
+    init_dict = gp.process('init.ini')
 
+    init_dict['ESTIMATION']['maxiter'] = 0
+#    init_dict['ESTIMATION']['start'] = 'auto'
 
-print rslt['fval']
-assert np.abs(rslt['fval']- 0.734631068458) < 0.00001
+    print count
+    count = count + 1
+
+    gp.simulate(init_dict)
+    # Estimate model
+    rslt = gp.estimate(init_dict)
