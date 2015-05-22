@@ -1,40 +1,75 @@
-def _choose(self, y, p1, p2):
-        """ Choose utility-maximizing bundle.
-        """
-        # Antibugging
-        integrity_checks('_choose_rational_in', y, p1, p2)
+# Fundamental Numerical Methods
+import numpy as np
 
-        # Determine starting values
-        x0 = np.array([(0.5 * y) / p1, (0.5 * y) / p2])
+# System-specific parameters and functions
+import sys
 
-        # Construct budget constraint
-        constraint_divergence = dict()
+# Adding the modules subdirectory
+#sys.path.insert(0, 'modules')
 
-        constraint_divergence['type'] = 'eq'
+# Project library
+from clsAgent import *
+from clsEconomy import *
 
-        constraint_divergence['args'] = (p1, p2)
+NUM_AGENTS = 1000  # Number of agents in the population
 
-        constraint_divergence['fun'] = self._constraint
+ENDOWMENT = 10.0  # Endowments of agents
 
-        constraints = [constraint_divergence, ]
+ALPHA = 0.75      # Utility weights
 
-        # Call constraint-optimizer. Of course, we could determine the
-        # optimal bundle directly, but I wanted to illustrate the use of
-        # a constraint optimization algorithm to you.
-        rslt = minimize(self._criterion, x0, method='SLSQP',
-                        constraints=constraints)
+P1 = 1.0          # Price of first good (Numeraire)
 
-        # Check for convergence
-        assert (rslt['success'] == True)
+NUM_POINTS = 1   # Number of points for grid of price changes
 
-        # Transformation of result.
-        x = rslt['x'] ** 2
+# Construct grid for price changes.
+PRICE_GRID = np.linspace(P1, 10, num=NUM_POINTS)
 
-        # Type conversion
-        x = x.tolist()
+# Simulate agent populations of different types
+agent_objs = dict()
 
-        # Quality Checks
-        integrity_checks('_choose_rational_out', x)
+for type_ in ['random', 'rational']:
 
-        # Finishing
-        return x
+    agent_objs[type_] = []
+
+    for _ in range(NUM_AGENTS):
+
+        # Specify agent
+        if type_ == 'rational':
+            agent_obj = RationalAgent()
+        elif type_ == 'random':
+            agent_obj = RandomAgent()
+        else:
+            raise AssertionError
+
+        agent_obj.set_preference_parameter(ALPHA)
+
+        agent_obj.set_endowment(ENDOWMENT)
+
+        # Collect a list fo agents, i.e. the population
+        agent_objs[type_] += [agent_obj]
+
+# Get market demands for varying price schedules
+market_demands = dict()
+
+for type_ in ['random', 'rational']:
+
+    market_demands[type_] = {'demand': [], 'sd': []}
+
+    # Initialize economy with agent of particular types
+    economy_obj = EconomyCls(agent_objs[type_])
+
+    # Vary price schedule for the second good.
+    for p2 in PRICE_GRID:
+
+        # Get market demand information
+        rslt = economy_obj.get_aggregate_demand(P1, p2)
+
+        # Construct average demand for second good
+        demand = rslt['demand'][1]/float(NUM_AGENTS)
+
+        # Construct standard deviation for second good
+        demand_sd = rslt['sd'][1]
+
+        # Collect demands and standard deviations
+        market_demands[type_]['demand'] += [demand]
+        market_demands[type_]['sd'] += [demand_sd]
