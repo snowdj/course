@@ -2,6 +2,9 @@
     generalized Roy model.
 """
 
+# Encoding and Decoding
+import codecs
+
 # Lexical Analysis
 import shlex
 
@@ -15,7 +18,6 @@ from scipy.optimize import minimize
 
 ''' Process '''
 
-
 def process(file_):
     """ Process initialization file.
     """
@@ -24,6 +26,11 @@ def process(file_):
 
     for line in open(file_).readlines():
 
+        # Remove UTF-3 marker
+        if line.startswith(codecs.BOM_UTF8):
+            line = line[3:]
+
+        # Split line
         list_ = shlex.split(line)
 
         # Determine special cases
@@ -150,19 +157,14 @@ def _add_auxiliary(dict_):
     dict_['AUX'] = {}
 
     # Full set of coefficients.
-    dict_['TREATED']['all'] = [dict_['TREATED']['int']]
-    dict_['TREATED']['all'] += dict_['TREATED']['coeff']
-    dict_['TREATED']['all'] = np.array(dict_['TREATED']['all'])
-
-    dict_['UNTREATED']['all'] = [dict_['UNTREATED']['int']]
-    dict_['UNTREATED']['all'] += dict_['UNTREATED']['coeff']
-    dict_['UNTREATED']['all'] = np.array(dict_['UNTREATED']['all'])
-
-    dict_['COST']['all'] = np.array(dict_['COST']['coeff'])
+    for key_ in ['TREATED', 'UNTREATED', 'COST']:
+        dict_[key_]['all'] = [dict_[key_]['int']]
+        dict_[key_]['all'] += dict_[key_]['coeff']
+        dict_[key_]['all'] = np.array(dict_[key_]['all'])
 
     # Number of covariates
-    num_covars_out = len(dict_['TREATED']['coeff']) + 1
-    num_covars_cost = len(dict_['COST']['coeff'])
+    num_covars_out = len(dict_['TREATED']['all'])
+    num_covars_cost = len(dict_['COST']['all'])
 
     dict_['AUX']['num_covars_out'] = num_covars_out
     dict_['AUX']['num_covars_cost'] = num_covars_cost
@@ -172,11 +174,10 @@ def _add_auxiliary(dict_):
 
     # Starting values
     dict_['AUX']['init_values'] = []
-    dict_['AUX']['init_values'] += [dict_['TREATED']['int']]
-    dict_['AUX']['init_values'] += dict_['TREATED']['coeff']
-    dict_['AUX']['init_values'] += [dict_['UNTREATED']['int']]
-    dict_['AUX']['init_values'] += dict_['UNTREATED']['coeff']
-    dict_['AUX']['init_values'] += dict_['COST']['coeff']
+
+    for key_ in ['TREATED', 'UNTREATED', 'COST']:
+        dict_['AUX']['init_values'] += dict_[key_]['all'].tolist()
+
     dict_['AUX']['init_values'] += [dict_['TREATED']['sd']]
     dict_['AUX']['init_values'] += [dict_['UNTREATED']['sd']]
     dict_['AUX']['init_values'] += [dict_['DIST']['rho1']]
@@ -208,9 +209,7 @@ def _process_cases(list_):
     # Finishing
     return is_empty, is_keyword
 
-
 ''' Simulate '''
-
 
 def simulate(init_dict, unobserved=False):
     """ Simulate a model based on the initialization file.
@@ -230,7 +229,7 @@ def simulate(init_dict, unobserved=False):
     Y1_coeffs = init_dict['TREATED']['all']
     Y0_coeffs = init_dict['UNTREATED']['all']
 
-    C_coeffs = np.array(init_dict['COST']['coeff'])
+    C_coeffs = np.array(init_dict['COST']['all'])
 
     U1_sd = init_dict['TREATED']['sd']
     U0_sd = init_dict['UNTREATED']['sd']
@@ -252,12 +251,15 @@ def simulate(init_dict, unobserved=False):
     covs = np.identity(num_covars_out)
 
     X = np.random.multivariate_normal(means, covs, num_agents)
-    X[:, 0] = 1.0
 
     means = np.tile(0.0, num_covars_cost)
     covs = np.identity(num_covars_cost)
 
     Z = np.random.multivariate_normal(means, covs, num_agents)
+
+    # Add intercepts. The first column of the X and Z matrix always contains
+    # the intercept term. This is exploited throughout the code.
+    Z[:,0], X[:, 0] = 1.0, 1.0
 
     # Construct index of observable characteristics
     Y1_level = np.dot(Y1_coeffs, X.T)
@@ -266,7 +268,7 @@ def simulate(init_dict, unobserved=False):
 
     # Simulate unobservables
     means = np.tile(0.0, 3)
-    vars_ = [U1_sd ** 2, U0_sd ** 2, V_sd ** 2]
+    vars_ = [U1_sd**2, U0_sd**2, V_sd**2]
     covs = np.diag(vars_)
 
     covs[0, 2] = U1V_cov
@@ -285,6 +287,7 @@ def simulate(init_dict, unobserved=False):
     D = np.tile(np.nan, num_agents)
 
     for i in range(num_agents):
+
         # Select individual unobservables and observables
         u1, u0, v = U[i, 0], U[i, 1], U[i, 2]
 
@@ -349,8 +352,7 @@ def _write_out(Y, D, X, Z, source, unobserved=False, Y1=None, Y0=None):
         np.savetxt(source, np.column_stack((Y, D, X, Z, Y1, Y0)),
                    fmt='%8.3f')
 
-    ''' Estimate '''
-
+''' Estimate '''
 
 def estimate(init_dict):
     """ Estimate our version of the generalized Roy model.
@@ -369,7 +371,7 @@ def estimate(init_dict):
     num_covars_out = init_dict['AUX']['num_covars_out']
 
     # Initialize different starting values
-    x0 = _get_start(start, init_dict)
+    x0 = _get_start(start, init_dict, Y, D, X, Z)
 
     # Select optimizer
     if optimizer == 'nm':
@@ -401,9 +403,10 @@ def estimate(init_dict):
 
         # Check out the SciPy documentation for details about the interface
         # to the `minimize' function that provides a convenient interface to
-        #  a variety of alternative maximization algorithms. You will also
+        # a variety of alternative maximization algorithms. You will also
         # find information about the return information.
-        opt_rslt = minimize(_max_interface, x0, args=(Y, D, X, Z, init_dict),
+        opt_rslt = minimize(_max_interface, x0,
+                            args=(Y, D, X, Z, init_dict),
                             method=optimizer, options=opts)
 
         # Compile results
@@ -457,11 +460,13 @@ def _distribute_parameters(x, init_dict, num_covars_out):
     rslt['AUX']['x_internal'][-2] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-2])))
     rslt['AUX']['x_internal'][-1] = -1.0 + 2.0 / (1.0 + float(np.exp(-x[-1])))
 
+    rslt['AUX']['init_values'] = init_dict['AUX']['init_values']
+
     # Finishing.
     return rslt
 
 
-def _max_interface(x, Y, D, X, Z, init_dict):
+def _max_interface(x, Y, D, X, Z, version, init_dict):
     """ Interface to the SciPy maximization routines.
     """
     # Auxiliary objects
@@ -478,23 +483,14 @@ def _max_interface(x, Y, D, X, Z, init_dict):
 
 
 def _negative_log_likelihood(args, Y, D, X, Z):
-    """ Negative log-likelihood evaluation.
+    """ Negative Log-likelihood function of the generalized Roy model.
     """
-    # Distribute parametrization
-    Y1_coeffs = np.array(args['TREATED']['all'])
-    Y0_coeffs = np.array(args['UNTREATED']['all'])
-    C_coeffs = np.array(args['COST']['all'])
+    # Distribute arguments
+    Y1_coeffs, Y0_coeffs, C_coeffs, choice_coeffs, U1_sd, U0_sd, U1V_rho, \
+    U0V_rho, V_sd = _distribute_arguments(args)
 
-    U1_sd = args['TREATED']['sd']
-    U0_sd = args['UNTREATED']['sd']
-
-    V_sd = args['COST']['sd']
-
-    U1V_rho = args['DIST']['rho1']
-    U0V_rho = args['DIST']['rho0']
-
+    # Auxiliary objects
     num_agents = Y.shape[0]
-    choice_coeffs = np.concatenate((Y1_coeffs - Y0_coeffs, - C_coeffs))
 
     # Initialize containers
     likl = np.tile(np.nan, num_agents)
@@ -503,19 +499,18 @@ def _negative_log_likelihood(args, Y, D, X, Z):
     # Likelihood construction.
     for i in range(num_agents):
 
-        G = np.concatenate((X[i, :], Z[i, :]))
-        choice_idx[i] = np.dot(choice_coeffs, G)
+        g = np.concatenate((X[i, :], Z[i,:]))
+        choice_idx[i] = np.dot(choice_coeffs, g)
 
         # Select outcome information
         if D[i] == 1.00:
-
             coeffs, rho, sd = Y1_coeffs, U1V_rho, U1_sd
         else:
             coeffs, rho, sd = Y0_coeffs, U0V_rho, U0_sd
 
         arg_one = (Y[i] - np.dot(coeffs, X[i, :])) / sd
         arg_two = (choice_idx[i] - rho * V_sd * arg_one) / \
-                  np.sqrt((1.0 - rho ** 2) * V_sd ** 2)
+                  np.sqrt((1.0 - rho ** 2) * V_sd**2)
 
         pdf_evals, cdf_evals = norm.pdf(arg_one), norm.cdf(arg_two)
 
@@ -537,39 +532,18 @@ def _negative_log_likelihood(args, Y, D, X, Z):
     return likl
 
 
-def _load_data(init_dict):
-    """ Load dataset.
-    """
-    # Auxiliary objects
-    num_covars_out = init_dict['AUX']['num_covars_out']
-    num_covars_cost = init_dict['AUX']['num_covars_cost']
-    num_agents = init_dict['BASICS']['agents']
-
-    # Read dataset
-    data = np.genfromtxt(init_dict['BASICS']['source'])
-
-    # Reshaping, this ensure that the program also runs with just one agent
-    # as otherwise only an vector is created. This creates problems for the
-    # subsetting of the overall data into the components.
-    data = np.array(data, ndmin=2)
-
-    # Distribute data
-    Y, D = data[:, 0], data[:, 1]
-
-    X, Z = data[:, 2:(num_covars_out + 2)], data[:, -num_covars_cost:]
-
-    # Finishing
-    return Y, D, X, Z
-
-
-def _get_start(which, init_dict):
+def _get_start(which, init_dict, Y, D, X, Z):
     """ Get different kind of starting values.
     """
     # Antibugging.
-    assert (which in ['random', 'init'])
+    assert (which in ['random', 'init', 'auto'])
 
     # Distribute auxiliary objects
     num_paras = init_dict['AUX']['num_paras']
+    num_covars_cost = init_dict['AUX']['num_covars_cost']
+
+    # Construct auxiliary objects
+    G = np.concatenate((X, Z[:, 1:]), axis=1)
 
     # Select relevant values.
     if which == 'random':
@@ -585,6 +559,39 @@ def _get_start(which, init_dict):
 
     elif which == 'init':
         x0 = np.array(init_dict['AUX']['init_values'][:])
+
+    elif which == 'auto':
+
+        # Subsetting
+        Y1, X1 = Y[D == 1], X[(D == 1), :]
+        olsRslt = sm.OLS(Y1, X1).fit()
+
+        # Extract results
+        coeffs_treated = olsRslt.params
+        sd_treated = np.array(np.sqrt(olsRslt.scale))
+
+        # Subsetting
+        Y0, X0 = Y[D == 0], X[(D == 0), :]
+        olsRslt = sm.OLS(Y0, X0).fit()
+
+        # Extract results
+        coeffs_untreated = olsRslt.params
+        sd_untreated = np.array(np.sqrt(olsRslt.scale))
+
+        # Estimate choice model
+        probitRslt = sm.Probit(D, G).fit()
+        sd = init_dict['COST']['sd']
+        coeffs = probitRslt.params*sd
+
+        # Special treatment of cost intercept
+        cost_int = coeffs_treated[0] - coeffs_untreated[0] - coeffs[0]
+
+        # Collect results
+        x0 = np.concatenate((coeffs_treated, coeffs_untreated))
+        x0 = np.concatenate((x0, [cost_int], -coeffs[-(num_covars_cost - 1):]))
+        x0 = np.concatenate((x0, [sd_treated, sd_untreated]))
+        x0 = np.concatenate((x0, [0.00, 0.00]))
+
     else:
         raise AssertionError
 
@@ -625,9 +632,53 @@ def _transform_start(x):
     # Finishing
     return x
 
+def _load_data(init_dict):
+    """ Load dataset.
+    """
+    # Auxiliary objects
+    num_covars_out = init_dict['AUX']['num_covars_out']
+    num_covars_cost = init_dict['AUX']['num_covars_cost']
+    num_agents = init_dict['BASICS']['agents']
+
+    # Read dataset
+    data = np.genfromtxt(init_dict['BASICS']['source'])
+
+    # Reshaping, this ensure that the program also runs with just one agent
+    # as otherwise only an vector is created. This creates problems for the
+    # subsetting of the overall data into the components.
+    data = np.array(data, ndmin=2)
+
+    # Distribute data
+    Y, D = data[:, 0], data[:, 1]
+
+    X, Z = data[:, 2:(num_covars_out + 2)], data[:, -num_covars_cost:]
+
+    # Finishing
+    return Y, D, X, Z
+
+def _distribute_arguments(args):
+    """ Distribute arguments for evaluation of criterion function and some
+        auxiliary parameters.
+    """
+    Y1_coeffs = np.array(args['TREATED']['all'])
+    Y0_coeffs = np.array(args['UNTREATED']['all'])
+
+    C_coeffs = np.array(args['COST']['all'])
+
+    U1_sd = args['TREATED']['sd']
+    U0_sd = args['UNTREATED']['sd']
+
+    U1V_rho = args['DIST']['rho1']
+    U0V_rho = args['DIST']['rho0']
+    V_sd = args['COST']['sd']
+
+    choice_coeffs = np.concatenate((Y1_coeffs - Y0_coeffs, - C_coeffs))
+
+    # Finishing
+    return Y1_coeffs, Y0_coeffs, C_coeffs, choice_coeffs, U1_sd, U0_sd, \
+           U1V_rho, U0V_rho, V_sd
 
 ''' Inspect '''
-
 
 def inspect(rslt, init_dict):
     """ This function simulates a sample from the estimates of the model
@@ -646,15 +697,16 @@ def inspect(rslt, init_dict):
             continue
 
         for subkey in rslt[key_].keys():
+
             modified_init[key_][subkey] = rslt[key_][subkey]
 
     # Modified dataset
-    modified_init['BASICS']['source'] = 'simulated.grm.txt'
+    modified_init['BASICS']['file'] = 'simulated.grm.txt'
 
     # Simulate from estimation results
     Y1, Y0, D = simulate(modified_init, True)
 
-    # Calculate the average treatment effects
+    # Calculate the average treatment effectsa
     B = Y1 - Y0
 
     effects = []
@@ -674,6 +726,7 @@ def inspect(rslt, init_dict):
         file_.write('\n Average Treatment Effects\n\n')
 
         for i, label in enumerate(['ATE', 'TT', 'TUT']):
+
             str_ = fmt.format(label, effects[i])
 
             file_.write(str_)
@@ -689,5 +742,7 @@ def inspect(rslt, init_dict):
         fmt = '{0:10.2f}{1:10.2f}\n'
 
         for i in range(num_paras):
+
             str_ = fmt.format(x0[i], x[i])
+
             file_.write(str_)
