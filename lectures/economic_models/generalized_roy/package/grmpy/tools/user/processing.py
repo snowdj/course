@@ -4,6 +4,7 @@
 
 # standard library
 import shlex
+import codecs
 
 import numpy as np
 
@@ -18,6 +19,11 @@ def process(file_):
 
     for line in open(file_).readlines():
 
+        # Remove UTF-3 marker
+        if line.startswith(codecs.BOM_UTF8):
+            line = line[3:]
+
+        # Split line
         list_ = shlex.split(line)
 
         # Determine special cases

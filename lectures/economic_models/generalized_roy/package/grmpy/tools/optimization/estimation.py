@@ -454,7 +454,6 @@ def _distribute_arguments(args):
     U0V_rho = args['DIST']['rho0']
     V_sd = args['COST']['sd']
 
-
     choice_coeffs = np.concatenate((Y1_coeffs - Y0_coeffs, - C_coeffs))
 
     # Finishing
