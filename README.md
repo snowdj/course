@@ -5,7 +5,7 @@ This repository contains the material for the *Software Engineering for Economis
 We acquire fundamental software engineering skills to tackle computer intensive economic research projects. These basic techniques allow us to leverage tools from computational science, increase the transparency of our implementations, and ensure the recomputability of results. Thus, they expand the set of possible economic questions
 that we can address and improve the quality of our answers.
 
-Check out the course [syllabus](https://github.com/softEcon/course/blob/master/syllabus.pdf) for details.
+Check out the course [syllabus](https://github.com/softEcon/course/blob/master/syllabus.pdf) for details. A broader perspective about the *Software Engineering for Economists Initiative* is provided here. 
 
 Contact:
 
