@@ -14,7 +14,7 @@ Contact:
 ## Material
 
 ### Lectures
-* [Introduction](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/class_introduction/lecture.ipynb)
+* [Introduction](http://slideviewer.herokuapp.com/github/softEcon/course/blob/master/initiative.ipynb?create=1#/)
 * [Python Overview](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/python_overview/lecture.ipynb)
 * [Cloud Computing](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/cloud_computing/lecture.ipynb)
 * Economic Models
