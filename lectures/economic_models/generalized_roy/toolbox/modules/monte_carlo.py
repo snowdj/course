@@ -8,8 +8,9 @@ import os
 import argparse
 import numpy as np
 
-
-def conduct_monte_carlo(scale):
+''' Main functions
+'''
+def conduct_monte_carlo(init_file):
     """ This function conducts a Monte Carlo exercise to test the
         reliabilty of the grmToolbox.
     """
@@ -24,27 +25,29 @@ def conduct_monte_carlo(scale):
     # and store it as SIMULATION/target
     os.system('grmToolbox-simulate --init init.ini --update')
 
-    # Perturbing parameter values
-    cmd = 'grmToolbox-perturb --init init.ini --scale 0.1 --seed 1234 --update'
-    os.system(cmd)
-
-    # Re-estimate generalize Roy model using SIMULATION/target as
-    # DATA/source
+    # Reestimate generalize Roy model using SIMULATION
+    # as source and starting values from initialization
+    # file
     os.system('grmToolbox-estimate --init init.ini --simulation')
+
 
 def process(args):
     """ Process arguments.
     """
-    # Distribute arguments.
-    scale = args.scale
+    # Distribute arguments
+    init_file = args.init_file
 
-    # Quality checks.
-    assert (isinstance(scale, float))
+    # Quality checks
+    assert (isinstance(init_file, str))
 
-    # Finishing.
-    return scale
+    # Finishing
+    return init_file
+
 
 def print_results():
+    """ Print results from Monte Carlo Exercise.
+    """
+
     # Load true and estimated parameters
     true_values = np.loadtxt('simulation.paras.grm.out')
     est_values = np.loadtxt('stepParas.grm.out')
@@ -59,12 +62,12 @@ def print_results():
     # Print both parameters
     print '     Start  Estimate     Truth    Difference \n'
     for i in range(num_paras):
-
         start, est, true = start_values[i], est_values[i], true_values[i]
 
         diff = est - true
 
         print fmt.format(start, est, true, diff)
+
 
 ''' Execution of module as script.
 '''
@@ -73,13 +76,13 @@ if __name__ == '__main__':
         'Conduct Monte Carlo exercise with grmToolbox.',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument('--scale', type=float, default=0.1,
-                        dest='scale', help='magnitude of perturbation')
+    parser.add_argument('--init', action='store', dest='init_file',
+        default='init.ini', help='source for model configuration')
 
     args = parser.parse_args()
 
-    scale = process(args)
+    init_file = process(args)
 
-    conduct_monte_carlo(scale)
+    conduct_monte_carlo(init_file)
 
     print_results()
