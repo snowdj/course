@@ -96,7 +96,7 @@ class _AgentCls(object):
             is overridden by the relevant method in the subclass.
         """
 
-        pass
+        raise NotImplementedError("Subclass must implement abstract method")
 
 
 # Inheritance
