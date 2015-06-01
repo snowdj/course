@@ -139,7 +139,7 @@ class RandomAgent(_AgentCls):
         # Finishing
         return x
 
-# Subclass of _AgentCls() wuth rational decision rule
+# Subclass of _AgentCls() with rational decision rule
 class RationalAgent(_AgentCls):
 
     def get_utility(self, x):
