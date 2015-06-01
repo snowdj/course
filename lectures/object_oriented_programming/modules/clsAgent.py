@@ -91,13 +91,20 @@ class _AgentCls(object):
         # Update class attributes
         self.x = x
 
+# Polymorphism
+# ------------
+#
+# The design of the agent classes also provides an example of a Polymorphism.
+# The agents always _choose(), but they _choose() differently. The
+# _choose() behavior is polymorphic in the sense that it is realized
+# differently depending on the agent's type.
+#
     def _choose(self, y, p1, p2):
         """ Actual implementation depends on the type of agent. This method
             is overridden by the relevant method in the subclass.
         """
 
-        raise NotImplementedError("Subclass must implement abstract method")
-
+        raise NotImplementedError('Subclass must implement abstract method')
 
 # Inheritance
 # -----------

@@ -11,65 +11,64 @@ import sys
 from clsAgent import *
 from clsEconomy import *
 
-NUM_AGENTS = 1000  # Number of agents in the population
+class Agent():
+    def __init__(self, endowment):
+        """ Initialize agents with endowment as class attributes.
+        """
+        # Endowment
+        self.endowment = endowment
 
-ENDOWMENT = 10.0  # Endowments of agents
+        # Demands
+        self.butter = None
+        self.milk = None
 
-ALPHA = 0.75      # Utility weights
+    def choose(self, price_butter, price_milk):
+        """ Allocate half of endowment to each
+            of the two goods.
+        """
+        self.butter = self.endowment/price_butter
+        self.milk = self.endowment/price_milk
 
-P1 = 1.0          # Price of first good (Numeraire)
+    def get_demands(self):
+        """ Return demands.
+        """
+        return self.butter, self.milk
 
-NUM_POINTS = 1   # Number of points for grid of price changes
+    def __str__(self):
+        """ String representation of class instance
+        """
+        # Distribute class attributes
+        endowment = self.endowment
 
-# Construct grid for price changes.
-PRICE_GRID = np.linspace(P1, 10, num=NUM_POINTS)
+        return 'I am an agent with an endwoment of ' + str(endowment) + '.'
 
-# Simulate agent populations of different types
-agent_objs = dict()
+    def __eq__(self, other):
+        """ Check for equality.
+        """
+        # Antibugging
+        assert isinstance(other, Agent)
 
-for type_ in ['random', 'rational']:
+        # Distribute class attributes
+        self_end = self.endowment
+        other_end = other.endowment
 
-    agent_objs[type_] = []
+        # Check equality
+        return self_end == other_end
 
-    for _ in range(NUM_AGENTS):
 
-        # Specify agent
-        if type_ == 'rational':
-            agent_obj = RationalAgent()
-        elif type_ == 'random':
-            agent_obj = RandomAgent()
-        else:
-            raise AssertionError
 
-        agent_obj.set_preference_parameter(ALPHA)
 
-        agent_obj.set_endowment(ENDOWMENT)
+# Initialize and agent with an endowment
+ENDOWMENT, PRICE_BUTTER, PRICE_MILK = 10, 2, 3
 
-        # Collect a list fo agents, i.e. the population
-        agent_objs[type_] += [agent_obj]
+agent_obj = Agent(11.234)
 
-# Get market demands for varying price schedules
-market_demands = dict()
+agent_obj.choose(PRICE_BUTTER, PRICE_MILK)
 
-for type_ in ['random', 'rational']:
+print ' Let us have a look at the demand for the two goods: '
+print '... using the demand() method      ', agent_obj.get_demands()
+print '... accessing the class attributes ', (agent_obj.butter, agent_obj.milk)
 
-    market_demands[type_] = {'demand': [], 'sd': []}
+agent_obj2 = Agent(11.2224)
 
-    # Initialize economy with agent of particular types
-    economy_obj = EconomyCls(agent_objs[type_])
-
-    # Vary price schedule for the second good.
-    for p2 in PRICE_GRID:
-
-        # Get market demand information
-        rslt = economy_obj.get_aggregate_demand(P1, p2)
-
-        # Construct average demand for second good
-        demand = rslt['demand'][1]/float(NUM_AGENTS)
-
-        # Construct standard deviation for second good
-        demand_sd = rslt['sd'][1]
-
-        # Collect demands and standard deviations
-        market_demands[type_]['demand'] += [demand]
-        market_demands[type_]['sd'] += [demand_sd]
+print agent_obj == agent_obj2
