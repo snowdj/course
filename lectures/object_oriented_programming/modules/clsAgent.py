@@ -59,7 +59,11 @@ class _AgentCls(object):
         # Finishing
         return rslt
 
-    # Static methods do not receive an implicit first argument.
+# Static Methods
+# -----------
+#
+# Static methods do not receive an implicit first argument.
+#
     @ staticmethod
     def spending(x, p1, p2):
         """ Calculate spending level.
@@ -119,25 +123,7 @@ class RandomAgent(_AgentCls):
     def _choose(self, y, p1, p2):
         """ Choose a random bundle on the budget line.
         """
-        # Antibugging
-        integrity_checks('_choose_random_in', y, p1, p2)
-
-        # Determine maximal consumption of good two
-        max_two = y / p2
-
-        # Initialize result container
-        x = [None, None]
-
-        # Select random bundle
-        x[1] = float(np.random.uniform(0, max_two))
-
-        x[0] = (y - x[1] * p2) / p1
-
-        # Quality Checks
-        integrity_checks('_choose_random_out', x)
-
-        # Finishing
-        return x
+        raise NotImplementedError('Not implemented ...')
 
 # Subclass of _AgentCls() with rational decision rule
 class RationalAgent(_AgentCls):
