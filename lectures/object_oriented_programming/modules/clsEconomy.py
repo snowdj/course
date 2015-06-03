@@ -30,5 +30,27 @@ class EconomyCls(object):
         """ Aggregate demand of the individual agents to the overall demand
             for each good in the economy.
         """
+        # Antibugging
+        integrity_checks('get_aggregate_demand_in', p1, p2)
 
-        raise NotImplementedError('Not implemented ...')
+        # Distribute class attributes
+        agent_objs = self.population
+
+        # Loop over all agents in the population.
+        demand_x1 = []
+        demand_x2 = []
+        for agent_obj in agent_objs:
+
+            agent_obj.choose(p1, p2)
+
+            demand_x1.append(agent_obj.get_individual_demand()[0])
+            demand_x2.append(agent_obj.get_individual_demand()[1])
+
+        # Record output
+        rslt = {'demand': [np.sum(demand_x1), np.sum(demand_x2)], 'sd': [np.std(demand_x1), np.std(demand_x2)]}
+
+        # Quality Assurance
+        integrity_checks('get_aggregate_demand_out', rslt)
+
+        # Finishing
+        return rslt

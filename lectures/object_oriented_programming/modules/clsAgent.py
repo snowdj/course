@@ -123,7 +123,25 @@ class RandomAgent(_AgentCls):
     def _choose(self, y, p1, p2):
         """ Choose a random bundle on the budget line.
         """
-        raise NotImplementedError('Not implemented ...')
+        # Antibugging
+        integrity_checks('_choose_random_in', y, p1, p2)
+
+        # Determine maximal consumption of good two
+        max_two = y / p2
+
+        # Initialize result container
+        x = [None, None]
+
+        # Select random bundle
+        x[1] = float(np.random.uniform(0, max_two))
+
+        x[0] = (y - x[1] * p2) / p1
+
+        # Quality Checks
+        integrity_checks('_choose_random_out', x)
+
+        # Finishing
+        return x
 
 # Subclass of _AgentCls() with rational decision rule
 class RationalAgent(_AgentCls):
