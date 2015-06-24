@@ -29,7 +29,6 @@ Contact:
 * [Integrated Development Environment](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/integrated_development_environment/lecture.ipynb) 
 * [Object Oriented Programming](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/object_oriented_programming/lecture.ipynb) 
 * [Version Control](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/version_control/lecture.ipynb) 
-
 * Special Topics
   * [Toolkit for Advanced Optimization](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/special_topics/toolkit_for_advanced_optimization/lecture.ipynb ) 
 
