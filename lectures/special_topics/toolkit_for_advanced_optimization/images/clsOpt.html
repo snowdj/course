@@ -1,0 +1,150 @@
+
+<!-- saved from url=(0142)file:///home/peisenha/Dropbox/@office/teaching/lectures/softEcon/course/lectures/economic_models/generalized_roy/toolbox/images/clsOpt.py.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>clsOpt.py</title>
+
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(128,128,128); font-style: italic; }
+.s1 { }
+.s2 { color: rgb(0,0,128); font-weight: bold; }
+.s3 { color: rgb(0,0,255); }
+.s4 { color: rgb(0,128,0); font-weight: bold; }
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table cellspacing="0" cellpadding="5" cols="1" width="100%" bgcolor="#C0C0C0">
+<tbody><tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+clsOpt.py</font>
+</center></td></tr></tbody></table>
+<pre>
+<span class="s0">""" Module that contains the class for the illustration 
+    of the Toolkit for Advanced Optimization. 
+"""</span><span class="s1"> 
+ 
+</span><span class="s0"># standard library</span><span class="s1"> 
+</span><span class="s2">import </span><span class="s1">numpy </span><span class="s2">as </span><span class="s1">np 
+</span><span class="s2">from </span><span class="s1">tao4py </span><span class="s2">import </span><span class="s1">TAO 
+</span><span class="s2">from </span><span class="s1">petsc4py </span><span class="s2">import </span><span class="s1">PETSc 
+ 
+</span><span class="s2">class </span><span class="s1">optCls(object): 
+    </span><span class="s0">""" Class to illustrate the use of the Toolkit for 
+        Advanced Optimization. 
+    """</span><span class="s1"> 
+    </span><span class="s2">def </span><span class="s1">__init__(self, num_agents, paras): 
+        </span><span class="s0">""" Initialize class. 
+        """</span><span class="s1"> 
+        </span><span class="s0"># Attach attributes</span><span class="s1"> 
+        self.num_agents = num_agents 
+ 
+        self.paras = paras 
+ 
+        </span><span class="s0"># Exogeneous parameter values</span><span class="s1"> 
+        self.num_paras = len(self.paras) 
+ 
+        </span><span class="s0"># Simulate data</span><span class="s1"> 
+        self._simulate() 
+ 
+    </span><span class="s2">def </span><span class="s1">create_vectors(self): 
+        </span><span class="s0">""" Create instances of PETSc objects. 
+        """</span><span class="s1"> 
+        </span><span class="s0"># Distribute class attributes</span><span class="s1"> 
+        num_agents = self.num_agents 
+        num_paras = self.num_paras 
+ 
+        </span><span class="s0"># Create container for parameter values</span><span class="s1"> 
+        paras = PETSc.Vec().create(PETSc.COMM_SELF) 
+        paras.setSizes(num_paras) 
+ 
+        </span><span class="s0"># Create container for criterion function</span><span class="s1"> 
+        crit = PETSc.Vec().create(PETSc.COMM_SELF) 
+        crit.setSizes(num_agents) 
+ 
+        </span><span class="s0"># Management</span><span class="s1"> 
+        paras.setFromOptions() 
+        crit.setFromOptions() 
+ 
+        </span><span class="s0"># Finishing</span><span class="s1"> 
+        </span><span class="s2">return </span><span class="s1">paras, crit 
+ 
+    </span><span class="s2">def </span><span class="s1">set_initial_guess(self, paras, START): 
+        </span><span class="s0">""" Initialize the initial parameter values 
+        """</span><span class="s1"> 
+        </span><span class="s0"># Set starting value</span><span class="s1"> 
+        paras[:] = START 
+ 
+    </span><span class="s2">def </span><span class="s1">form_separable_objective(self, tao, paras, f): 
+        </span><span class="s0">""" Form objective function for the POUNDerS algorithm. 
+        """</span><span class="s1"> 
+        </span><span class="s0"># Calculate deviations</span><span class="s1"> 
+        dev = self._get_deviations(paras) 
+ 
+        </span><span class="s0"># Attach to PETSc object</span><span class="s1"> 
+        f.array = dev 
+ 
+    </span><span class="s2">def </span><span class="s1">form_objective(self, tao, paras): 
+        </span><span class="s0">""" Form objective function for Nelder-Mead algorithm. 
+        """</span><span class="s1"> 
+        </span><span class="s0"># Calculate deviations</span><span class="s1"> 
+        dev = self._get_deviations(paras) 
+ 
+        </span><span class="s0"># Aggregate deviations</span><span class="s1"> 
+        ff = </span><span class="s3">0</span><span class="s1"> 
+        </span><span class="s2">for </span><span class="s1">i </span><span class="s2">in </span><span class="s1">range(self.num_agents): 
+            ff += dev[i]**</span><span class="s3">2</span><span class="s1"> 
+ 
+        </span><span class="s0"># Finishing</span><span class="s1"> 
+        </span><span class="s2">return </span><span class="s1">ff 
+ 
+    </span><span class="s2">def </span><span class="s1">plot_solution(self, X): 
+        </span><span class="s0">""" Plot the solution of the estimation 
+            run. 
+        """</span><span class="s1"> 
+        </span><span class="s0"># Distribute class attributes</span><span class="s1"> 
+        exog = self.endog 
+        endog = self.exog 
+ 
+        </span><span class="s0"># Create grid</span><span class="s1"> 
+        u = np.linspace(exog.min(), exog.max(), </span><span class="s3">100</span><span class="s1">) 
+        v = np.exp(-paras[</span><span class="s3">0</span><span class="s1">]*exog)/(paras[</span><span class="s3">1</span><span class="s1">] + paras[</span><span class="s3">2</span><span class="s1">]*exog) 
+ 
+        </span><span class="s0"># Set up graph</span><span class="s1"> 
+        pylab.plot(exog, endog, </span><span class="s4">'ro'</span><span class="s1">) 
+        pylab.plot(u, v, </span><span class="s4">'b-'</span><span class="s1">) 
+        pylab.show() 
+ 
+    </span><span class="s4">''' Private methods 
+    '''</span><span class="s1"> 
+    </span><span class="s2">def </span><span class="s1">_simulate(self): 
+        </span><span class="s0">""" Simulate data. 
+        """</span><span class="s1"> 
+        </span><span class="s0"># Distribute class attributes</span><span class="s1"> 
+        num_agents = self.num_agents 
+        paras = self.paras 
+ 
+        </span><span class="s0"># Simulate exogenous data</span><span class="s1"> 
+        exog = np.random.rand(num_agents) 
+        eps = np.random.normal(size=num_agents) 
+ 
+        </span><span class="s0"># Determine endogenous data</span><span class="s1"> 
+        endog = np.exp(-paras[</span><span class="s3">0</span><span class="s1">]*exog)/(paras[</span><span class="s3">1</span><span class="s1">] + paras[</span><span class="s3">2</span><span class="s1">]*exog) + eps 
+ 
+        </span><span class="s0"># Attach data to class instance</span><span class="s1"> 
+        self.exog = exog 
+        self.endog = endog 
+ 
+    </span><span class="s2">def </span><span class="s1">_get_deviations(self, paras): 
+        </span><span class="s0">""" Get whole vector of deviations. 
+        """</span><span class="s1"> 
+        </span><span class="s0"># Distribute class attributes</span><span class="s1"> 
+        exog = self.endog 
+        endog = self.exog 
+ 
+        </span><span class="s0"># Calculate deviations</span><span class="s1"> 
+        dev = endog - np.exp(-paras[</span><span class="s3">0</span><span class="s1">]*exog)/(paras[</span><span class="s3">1</span><span class="s1">] + paras[</span><span class="s3">2</span><span class="s1">]*exog) 
+ 
+        </span><span class="s0"># Finishing</span><span class="s1"> 
+        </span><span class="s2">return </span><span class="s1">dev</span></pre>
+
+</body></html>

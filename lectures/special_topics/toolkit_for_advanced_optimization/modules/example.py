@@ -69,7 +69,9 @@ for algorithm in ['tao_pounders', 'tao_nm']:
 
         rslt[algorithm]['rmse'] += [np.mean((PARAS - paras[:])**2)]
 
-        print tao.getgit comm
+        print tao.getFunctionValue(), paras[:]
+
+        # Cleanup
         paras.destroy()
 
         crit.destroy()
