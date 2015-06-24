@@ -30,7 +30,7 @@ Contact:
  * [Generalized Roy](http://nbviewer.ipython.org/github/grmToolbox/lectures/blob/master/model/lecture.ipynb)
    * [Notebook](http://nbviewer.ipython.org/github/grmToolbox/lectures/blob/master/notebook/lecture.ipynb) 
     * [Module](http://nbviewer.ipython.org/github/grmToolbox/lectures/blob/master/module/lecture.ipynb) 
-    * [Distrtibuted](http://nbviewer.ipython.org/github/grmToolbox/lectures/blob/master/distributed/lecture.ipynb)
+    * [Distributed](http://nbviewer.ipython.org/github/grmToolbox/lectures/blob/master/distributed/lecture.ipynb)
     * [Package](http://nbviewer.ipython.org/github/grmToolbox/lectures/blob/master/package/lecture.ipynb)
 
 ##### Special Topics
