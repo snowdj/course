@@ -15,10 +15,16 @@ Contact:
 ## Material
 
 ### Lectures
+
+Basics
 * [Introduction](http://slideviewer.herokuapp.com/github/softEcon/course/blob/master/initiative.ipynb?create=1#/)
 * [Python Overview](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/python_overview/lecture.ipynb)
 * [Cloud Computing](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/cloud_computing/lecture.ipynb)
-* Economic Models
+* [Integrated Development Environment](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/integrated_development_environment/lecture.ipynb) 
+* [Object Oriented Programming](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/object_oriented_programming/lecture.ipynb) 
+* [Version Control](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/version_control/lecture.ipynb) 
+
+Economic Models
  * [Carrer Choices](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/economic_models/career_choices/lecture.ipynb)
  * [Job Search](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/economic_models/job_search/lecture.ipynb)
  * [Generalized Roy](http://nbviewer.ipython.org/github/grmToolbox/lectures/blob/master/model/lecture.ipynb)
@@ -26,14 +32,8 @@ Contact:
     * [Module](http://nbviewer.ipython.org/github/grmToolbox/lectures/blob/master/module/lecture.ipynb) 
     * [Distrtibuted](http://nbviewer.ipython.org/github/grmToolbox/lectures/blob/master/distributed/lecture.ipynb)
     * [Package](http://nbviewer.ipython.org/github/grmToolbox/lectures/blob/master/package/lecture.ipynb)
-* [Integrated Development Environment](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/integrated_development_environment/lecture.ipynb) 
-* [Object Oriented Programming](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/object_oriented_programming/lecture.ipynb) 
-* [Version Control](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/version_control/lecture.ipynb) 
 
-
-
-
-* Special Topics
+Special Topics
   * [Toolkit for Advanced Optimization](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/special_topics/toolkit_for_advanced_optimization/lecture.ipynb ) 
 
 
