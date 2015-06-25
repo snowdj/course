@@ -67,7 +67,9 @@ class OptCls(object):
         f.array = dev
 
     def form_objective(self, tao, paras):
-        """ Form objective function for Nelder-Mead algorithm.
+        """ Form objective function for Nelder-Mead algorithm. The
+            FOR loop results in a costly evaluation of the
+            criterion function..
         """
         # Calculate deviations
         dev = self._get_deviations(paras)
