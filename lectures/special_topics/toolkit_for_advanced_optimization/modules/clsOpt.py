@@ -10,7 +10,7 @@ from tao4py import TAO
 from petsc4py import PETSc
 
 
-class optCls(object):
+class OptCls(object):
     """ Class to illustrate the use of the Toolkit for
         Advanced Optimization.
     """
@@ -50,7 +50,8 @@ class optCls(object):
         # Finishing
         return paras, crit
 
-    def set_initial_guess(self, paras, START):
+    @staticmethod
+    def set_initial_guess(paras, START):
         """ Initialize the initial parameter values
         """
         # Set starting value
@@ -118,7 +119,6 @@ class optCls(object):
 
         # Show plot
         plt.show()
-
 
     ''' Private methods
     '''
