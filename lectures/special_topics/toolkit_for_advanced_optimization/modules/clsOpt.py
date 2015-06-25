@@ -4,8 +4,11 @@
 
 # standard library
 import numpy as np
+import matplotlib.pyplot as plt
+
 from tao4py import TAO
 from petsc4py import PETSc
+
 
 class optCls(object):
     """ Class to illustrate the use of the Toolkit for
@@ -76,22 +79,46 @@ class optCls(object):
         # Finishing
         return ff
 
-    def plot_solution(self, X):
+    def plot_solution(self, paras):
         """ Plot the solution of the estimation
             run.
         """
         # Distribute class attributes
-        exog = self.endog
-        endog = self.exog
+        exog = self.exog
+        endog = self.endog
 
-        # Create grid
+        # Initialize grid
         u = np.linspace(exog.min(), exog.max(), 100)
-        v = np.exp(-paras[0]*exog)/(paras[1] + paras[2]*exog)
+        v = np.exp(-paras[0]*u)/(paras[1] + paras[2]*u)
 
-        # Set up graph
-        pylab.plot(exog, endog, 'ro')
-        pylab.plot(u, v, 'b-')
-        pylab.show()
+        # Initialize canvas
+        ax = plt.figure(figsize=(12,8)).add_subplot(111)
+
+        # Plot execution times by implementations
+        ax.plot(exog, endog, 'ro', label='Observed')
+        ax.plot(u, v, 'b-', label='Predicted')
+
+        # Set axis labels
+        ax.set_xlabel('x', fontsize=20)
+        ax.set_ylabel('y', fontsize=20)
+
+        # Change background color
+        ax.set_axis_bgcolor('white')
+
+        # Set up legend
+        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.10),
+            fancybox=False, frameon=False, shadow=False, ncol=2,
+            fontsize=20)
+
+        # Remove first element on y-axis
+        ax.yaxis.get_major_ticks()[0].set_visible(False)
+
+        # Add title
+        plt.suptitle('Inspecting Model Fit', fontsize=20)
+
+        # Show plot
+        plt.show()
+
 
     ''' Private methods
     '''
@@ -117,8 +144,8 @@ class optCls(object):
         """ Get whole vector of deviations.
         """
         # Distribute class attributes
-        exog = self.endog
-        endog = self.exog
+        exog = self.exog
+        endog = self.endog
 
         # Calculate deviations
         dev = endog - np.exp(-paras[0]*exog)/(paras[1] + paras[2]*exog)
