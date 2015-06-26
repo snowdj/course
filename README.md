@@ -17,7 +17,7 @@ Contact:
 ### Lectures
 
 ##### Basics
-* [Introduction](http://slideviewer.herokuapp.com/github/softEcon/course/blob/master/initiative.ipynb?create=1)
+* [Introduction](http://slideviewer.herokuapp.com/github/softEcon/overview/blob/master/initiative.ipynb?create=1)
 * [Python Overview](http://nbviewer.ipython.org/github/softEcon/course/blob/master/basics/python_overview/lecture.ipynb)
 * [Cloud Computing](http://nbviewer.ipython.org/github/softEcon/course/blob/master/basics/cloud_computing/lecture.ipynb)
 * [Integrated Development Environment](http://nbviewer.ipython.org/github/softEcon/course/blob/master/basics/integrated_development_environment/lecture.ipynb) 
