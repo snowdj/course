@@ -25,8 +25,8 @@ Contact:
 * [Version Control](http://nbviewer.ipython.org/github/softEcon/course/blob/master/basics/version_control/lecture.ipynb) 
 
 ##### Economic Models
- * [Carrer Choices](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/economic_models/career_choices/lecture.ipynb)
- * [Job Search](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/economic_models/job_search/lecture.ipynb)
+ * [Carrer Choices](http://nbviewer.ipython.org/github/softEcon/course/blob/master/economic_models/career_choices/lecture.ipynb)
+ * [Job Search](http://nbviewer.ipython.org/github/softEcon/course/blob/master/economic_models/job_search/lecture.ipynb)
  * [Generalized Roy](http://nbviewer.ipython.org/github/grmToolbox/lectures/blob/master/model/lecture.ipynb)
    * [Notebook](http://nbviewer.ipython.org/github/grmToolbox/lectures/blob/master/notebook/lecture.ipynb) 
     * [Module](http://nbviewer.ipython.org/github/grmToolbox/lectures/blob/master/module/lecture.ipynb) 
@@ -34,7 +34,7 @@ Contact:
     * [Package](http://nbviewer.ipython.org/github/grmToolbox/lectures/blob/master/package/lecture.ipynb)
 
 ##### Special Topics
-  * [Toolkit for Advanced Optimization](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/special_topics/toolkit_for_advanced_optimization/lecture.ipynb ) 
+  * [Toolkit for Advanced Optimization](http://nbviewer.ipython.org/github/softEcon/course/blob/master/special_topics/toolkit_for_advanced_optimization/lecture.ipynb) 
 
 
 
