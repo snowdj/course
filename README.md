@@ -19,7 +19,7 @@ Contact:
 ##### Basics
 * [Introduction](http://slideviewer.herokuapp.com/github/softEcon/course/blob/master/initiative.ipynb?create=1#/)
 * [Python Overview](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/python_overview/lecture.ipynb)
-* [Cloud Computing](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/cloud_computing/lecture.ipynb)
+* [Cloud Computing](http://nbviewer.ipython.org/github/softEcon/course/blob/master/basics/cloud_computing/lecture.ipynb)
 * [Integrated Development Environment](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/integrated_development_environment/lecture.ipynb) 
 * [Object Oriented Programming](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/object_oriented_programming/lecture.ipynb) 
 * [Version Control](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/version_control/lecture.ipynb) 
