@@ -14,19 +14,17 @@ class OptCls(object):
     """ Class to illustrate the use of the Toolkit for
         Advanced Optimization.
     """
-    def __init__(self, num_agents, paras):
+    def __init__(self, exog, endog, START):
         """ Initialize class.
         """
         # Attach attributes
-        self.num_agents = num_agents
+        self.exog = exog
+        self.endog = endog
+        self.start = START
 
-        self.paras = paras
-
-        # Exogeneous parameter values
-        self.num_paras = len(self.paras)
-
-        # Simulate data
-        self._simulate()
+        # Derived attributes
+        self.num_agents = len(self.exog)
+        self.num_paras = len(self.start)
 
     def create_vectors(self):
         """ Create instances of PETSc objects.
@@ -50,12 +48,11 @@ class OptCls(object):
         # Finishing
         return paras, crit
 
-    @staticmethod
-    def set_initial_guess(paras, START):
+    def set_initial_guess(self, paras):
         """ Initialize the initial parameter values
         """
         # Set starting value
-        paras[:] = START
+        paras[:] = self.start
 
     def form_separable_objective(self, tao, paras, f):
         """ Form objective function for the POUNDerS algorithm.
@@ -82,66 +79,8 @@ class OptCls(object):
         # Finishing
         return ff
 
-    def plot_solution(self, paras):
-        """ Plot the solution of the estimation
-            run.
-        """
-        # Distribute class attributes
-        exog = self.exog
-        endog = self.endog
-
-        # Initialize grid
-        u = np.linspace(exog.min(), exog.max(), 100)
-        v = np.exp(-paras[0]*u)/(paras[1] + paras[2]*u)
-
-        # Initialize canvas
-        ax = plt.figure(figsize=(12,8)).add_subplot(111)
-
-        # Plot execution times by implementations
-        ax.plot(exog, endog, 'ro', label='Observed')
-        ax.plot(u, v, 'b-', label='Predicted')
-
-        # Set axis labels
-        ax.set_xlabel('x', fontsize=20)
-        ax.set_ylabel('y', fontsize=20)
-
-        # Change background color
-        ax.set_axis_bgcolor('white')
-
-        # Set up legend
-        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.10),
-            fancybox=False, frameon=False, shadow=False, ncol=2,
-            fontsize=20)
-
-        # Remove first element on y-axis
-        ax.yaxis.get_major_ticks()[0].set_visible(False)
-
-        # Add title
-        plt.suptitle('Inspecting Model Fit', fontsize=20)
-
-        # Show plot
-        plt.show()
-
     ''' Private methods
     '''
-    def _simulate(self):
-        """ Simulate data.
-        """
-        # Distribute class attributes
-        num_agents = self.num_agents
-        paras = self.paras
-
-        # Simulate exogenous data
-        exog = np.random.rand(num_agents)
-        eps = np.random.normal(size=num_agents)
-
-        # Determine endogenous data
-        endog = np.exp(-paras[0]*exog)/(paras[1] + paras[2]*exog) + eps
-
-        # Attach data to class instance
-        self.exog = exog
-        self.endog = endog
-
     def _get_deviations(self, paras):
         """ Get whole vector of deviations.
         """

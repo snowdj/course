@@ -1,7 +1,8 @@
-<html>
-<head>
+
+<!-- saved from url=(0151)file:///home/peisenha/Dropbox/@office/teaching/lectures/softEcon/course/lectures/special_topics/toolkit_for_advanced_optimization/images/clsOpt.py.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>clsOpt.py</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
 <style type="text/css">
 .ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
 .s0 { color: rgb(128,128,128); font-style: italic; }
@@ -11,17 +12,16 @@
 .s4 { color: rgb(0,128,0); font-weight: bold; }
 </style>
 </head>
-<BODY BGCOLOR="#ffffff">
-<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
-<TR><TD><CENTER>
-<FONT FACE="Arial, Helvetica" COLOR="#000000">
-clsOpt.py</FONT>
-</center></TD></TR></TABLE>
+<body bgcolor="#ffffff">
+<table cellspacing="0" cellpadding="5" cols="1" width="100%" bgcolor="#C0C0C0">
+<tbody><tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+clsOpt.py</font>
+</center></td></tr></tbody></table>
 <pre>
-
-<span class="s0">&quot;&quot;&quot; Module that contains the class for the illustration 
+<span class="s0">""" Module that contains the class for the illustration 
     of the Toolkit for Advanced Optimization. 
-&quot;&quot;&quot;</span><span class="s1"> 
+"""</span><span class="s1"> 
  
 </span><span class="s0"># standard library</span><span class="s1"> 
 </span><span class="s2">import </span><span class="s1">numpy </span><span class="s2">as </span><span class="s1">np 
@@ -32,26 +32,24 @@ clsOpt.py</FONT>
  
  
 </span><span class="s2">class </span><span class="s1">OptCls(object): 
-    </span><span class="s0">&quot;&quot;&quot; Class to illustrate the use of the Toolkit for 
+    </span><span class="s0">""" Class to illustrate the use of the Toolkit for 
         Advanced Optimization. 
-    &quot;&quot;&quot;</span><span class="s1"> 
-    </span><span class="s2">def </span><span class="s1">__init__(self, num_agents, paras): 
-        </span><span class="s0">&quot;&quot;&quot; Initialize class. 
-        &quot;&quot;&quot;</span><span class="s1"> 
+    """</span><span class="s1"> 
+    </span><span class="s2">def </span><span class="s1">__init__(self, exog, endog, START): 
+        </span><span class="s0">""" Initialize class. 
+        """</span><span class="s1"> 
         </span><span class="s0"># Attach attributes</span><span class="s1"> 
-        self.num_agents = num_agents 
+        self.exog = exog 
+        self.endog = endog 
+        self.start = START 
  
-        self.paras = paras 
- 
-        </span><span class="s0"># Exogeneous parameter values</span><span class="s1"> 
-        self.num_paras = len(self.paras) 
- 
-        </span><span class="s0"># Simulate data</span><span class="s1"> 
-        self._simulate() 
+        </span><span class="s0"># Derived attributes</span><span class="s1"> 
+        self.num_agents = len(self.exog) 
+        self.num_paras = len(self.start) 
  
     </span><span class="s2">def </span><span class="s1">create_vectors(self): 
-        </span><span class="s0">&quot;&quot;&quot; Create instances of PETSc objects. 
-        &quot;&quot;&quot;</span><span class="s1"> 
+        </span><span class="s0">""" Create instances of PETSc objects. 
+        """</span><span class="s1"> 
         </span><span class="s0"># Distribute class attributes</span><span class="s1"> 
         num_agents = self.num_agents 
         num_paras = self.num_paras 
@@ -71,16 +69,15 @@ clsOpt.py</FONT>
         </span><span class="s0"># Finishing</span><span class="s1"> 
         </span><span class="s2">return </span><span class="s1">paras, crit 
  
-    @staticmethod 
-    </span><span class="s2">def </span><span class="s1">set_initial_guess(paras, START): 
-        </span><span class="s0">&quot;&quot;&quot; Initialize the initial parameter values 
-        &quot;&quot;&quot;</span><span class="s1"> 
+    </span><span class="s2">def </span><span class="s1">set_initial_guess(self, paras): 
+        </span><span class="s0">""" Initialize the initial parameter values 
+        """</span><span class="s1"> 
         </span><span class="s0"># Set starting value</span><span class="s1"> 
-        paras[:] = START 
+        paras[:] = self.start 
  
     </span><span class="s2">def </span><span class="s1">form_separable_objective(self, tao, paras, f): 
-        </span><span class="s0">&quot;&quot;&quot; Form objective function for the POUNDerS algorithm. 
-        &quot;&quot;&quot;</span><span class="s1"> 
+        </span><span class="s0">""" Form objective function for the POUNDerS algorithm. 
+        """</span><span class="s1"> 
         </span><span class="s0"># Calculate deviations</span><span class="s1"> 
         dev = self._get_deviations(paras) 
  
@@ -88,8 +85,10 @@ clsOpt.py</FONT>
         f.array = dev 
  
     </span><span class="s2">def </span><span class="s1">form_objective(self, tao, paras): 
-        </span><span class="s0">&quot;&quot;&quot; Form objective function for Nelder-Mead algorithm. 
-        &quot;&quot;&quot;</span><span class="s1"> 
+        </span><span class="s0">""" Form objective function for Nelder-Mead algorithm. The 
+            FOR loop results in a costly evaluation of the 
+            criterion function.. 
+        """</span><span class="s1"> 
         </span><span class="s0"># Calculate deviations</span><span class="s1"> 
         dev = self._get_deviations(paras) 
  
@@ -101,69 +100,11 @@ clsOpt.py</FONT>
         </span><span class="s0"># Finishing</span><span class="s1"> 
         </span><span class="s2">return </span><span class="s1">ff 
  
-    </span><span class="s2">def </span><span class="s1">plot_solution(self, paras): 
-        </span><span class="s0">&quot;&quot;&quot; Plot the solution of the estimation 
-            run. 
-        &quot;&quot;&quot;</span><span class="s1"> 
-        </span><span class="s0"># Distribute class attributes</span><span class="s1"> 
-        exog = self.exog 
-        endog = self.endog 
- 
-        </span><span class="s0"># Initialize grid</span><span class="s1"> 
-        u = np.linspace(exog.min(), exog.max(), </span><span class="s3">100</span><span class="s1">) 
-        v = np.exp(-paras[</span><span class="s3">0</span><span class="s1">]*u)/(paras[</span><span class="s3">1</span><span class="s1">] + paras[</span><span class="s3">2</span><span class="s1">]*u) 
- 
-        </span><span class="s0"># Initialize canvas</span><span class="s1"> 
-        ax = plt.figure(figsize=(</span><span class="s3">12</span><span class="s1">,</span><span class="s3">8</span><span class="s1">)).add_subplot(</span><span class="s3">111</span><span class="s1">) 
- 
-        </span><span class="s0"># Plot execution times by implementations</span><span class="s1"> 
-        ax.plot(exog, endog, </span><span class="s4">'ro'</span><span class="s1">, label=</span><span class="s4">'Observed'</span><span class="s1">) 
-        ax.plot(u, v, </span><span class="s4">'b-'</span><span class="s1">, label=</span><span class="s4">'Predicted'</span><span class="s1">) 
- 
-        </span><span class="s0"># Set axis labels</span><span class="s1"> 
-        ax.set_xlabel(</span><span class="s4">'x'</span><span class="s1">, fontsize=</span><span class="s3">20</span><span class="s1">) 
-        ax.set_ylabel(</span><span class="s4">'y'</span><span class="s1">, fontsize=</span><span class="s3">20</span><span class="s1">) 
- 
-        </span><span class="s0"># Change background color</span><span class="s1"> 
-        ax.set_axis_bgcolor(</span><span class="s4">'white'</span><span class="s1">) 
- 
-        </span><span class="s0"># Set up legend</span><span class="s1"> 
-        ax.legend(loc=</span><span class="s4">'upper center'</span><span class="s1">, bbox_to_anchor=(</span><span class="s3">0.5</span><span class="s1">, -</span><span class="s3">0.10</span><span class="s1">), 
-            fancybox=False, frameon=False, shadow=False, ncol=</span><span class="s3">2</span><span class="s1">, 
-            fontsize=</span><span class="s3">20</span><span class="s1">) 
- 
-        </span><span class="s0"># Remove first element on y-axis</span><span class="s1"> 
-        ax.yaxis.get_major_ticks()[</span><span class="s3">0</span><span class="s1">].set_visible(False) 
- 
-        </span><span class="s0"># Add title</span><span class="s1"> 
-        plt.suptitle(</span><span class="s4">'Inspecting Model Fit'</span><span class="s1">, fontsize=</span><span class="s3">20</span><span class="s1">) 
- 
-        </span><span class="s0"># Show plot</span><span class="s1"> 
-        plt.show() 
- 
     </span><span class="s4">''' Private methods 
     '''</span><span class="s1"> 
-    </span><span class="s2">def </span><span class="s1">_simulate(self): 
-        </span><span class="s0">&quot;&quot;&quot; Simulate data. 
-        &quot;&quot;&quot;</span><span class="s1"> 
-        </span><span class="s0"># Distribute class attributes</span><span class="s1"> 
-        num_agents = self.num_agents 
-        paras = self.paras 
- 
-        </span><span class="s0"># Simulate exogenous data</span><span class="s1"> 
-        exog = np.random.rand(num_agents) 
-        eps = np.random.normal(size=num_agents) 
- 
-        </span><span class="s0"># Determine endogenous data</span><span class="s1"> 
-        endog = np.exp(-paras[</span><span class="s3">0</span><span class="s1">]*exog)/(paras[</span><span class="s3">1</span><span class="s1">] + paras[</span><span class="s3">2</span><span class="s1">]*exog) + eps 
- 
-        </span><span class="s0"># Attach data to class instance</span><span class="s1"> 
-        self.exog = exog 
-        self.endog = endog 
- 
     </span><span class="s2">def </span><span class="s1">_get_deviations(self, paras): 
-        </span><span class="s0">&quot;&quot;&quot; Get whole vector of deviations. 
-        &quot;&quot;&quot;</span><span class="s1"> 
+        </span><span class="s0">""" Get whole vector of deviations. 
+        """</span><span class="s1"> 
         </span><span class="s0"># Distribute class attributes</span><span class="s1"> 
         exog = self.exog 
         endog = self.endog 
@@ -173,5 +114,5 @@ clsOpt.py</FONT>
  
         </span><span class="s0"># Finishing</span><span class="s1"> 
         </span><span class="s2">return </span><span class="s1">dev</span></pre>
-</body>
-</html>
+
+</body></html>
