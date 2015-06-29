@@ -34,7 +34,7 @@ Contact:
     * [Package](http://nbviewer.ipython.org/github/grmToolbox/lectures/blob/master/package/lecture.ipynb)
 
 ##### Special Topics
-  * [Toolkit for Advanced Optimization](http://nbviewer.ipython.org/github/softEcon/course/blob/master/special_topics/toolkit_for_advanced_optimization/lecture.ipynb) 
+  * [Toolkit for Advanced Optimization](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/special_topics/toolkit_for_advanced_optimization/lecture.ipynb) 
 
 
 
