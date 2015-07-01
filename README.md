@@ -7,7 +7,7 @@ that we can address and improve the quality of our answers.
 
 Check out the course [syllabus](https://github.com/softEcon/course/blob/master/syllabus.pdf) for details. A broader perspective about the *Software Engineering for Economists Initiative* is provided [here](http://slideviewer.herokuapp.com/github/softEcon/overview/blob/master/initiative.ipynb?create=1). 
 
-We cordially invite researchers to submit lectures about topics they care about. If you are interested in contributing, please do not hesitate to let us know. 
+We cordially invite fellow economists to submit lectures about topics they care about. If you are interested in contributing, please do not hesitate to let us know. 
 
 Contact:
 
