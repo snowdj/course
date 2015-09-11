@@ -28,8 +28,9 @@ Contact:
 ##### Economic Models
  * [Carrer Choices](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/economic_models/career_choices/lecture.ipynb)
  * [Job Search](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/economic_models/job_search/lecture.ipynb)
- * [Generalized Roy](http://nbviewer.ipython.org/github/grmToolbox/model/blob/master/lecture/lecture.ipynb)
-   * [Notebook](http://nbviewer.ipython.org/github/grmToolbox/notebook/blob/master/lecture/lecture.ipynb) 
+ * [Generalized Roy](http://grmtoolbox.github.io)
+ 	* [Model](http://nbviewer.ipython.org/github/grmToolbox/model/blob/master/lecture/lecture.ipynb)
+   	* [Notebook](http://nbviewer.ipython.org/github/grmToolbox/notebook/blob/master/lecture/lecture.ipynb) 
     * [Module](http://nbviewer.ipython.org/github/grmToolbox/module/blob/master/lecture/lecture.ipynb) 
     * [Private Package](http://nbviewer.ipython.org/github/grmToolbox/private.package/blob/master/lecture/lecture.ipynb)
     * [Public Package](http://nbviewer.ipython.org/github/grmToolbox/public.package/blob/master/lecture/lecture.ipynb)
