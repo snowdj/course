@@ -6,7 +6,7 @@ We acquire fundamental software engineering skills to tackle computer intensive 
 
 Check out the course [syllabus](https://github.com/softEcon/course/blob/master/syllabus.pdf) for details. A broader perspective about the *Software Engineering for Economists Initiative* is provided [here](http://slideviewer.herokuapp.com/github/softEcon/overview/blob/master/initiative.ipynb?create=1). We use a Virtual Machine for the class and the image is available [online](https://atlas.hashicorp.com/softEcon/boxes/base). 
 
-We cordially invite fellow economists to submit lectures about topics they care about. If you are interested in contributing, please do not hesitate to let us know. 
+We cordially invite fellow economists to submit lectures about topics they care about. If you are interested in contributing, please do not hesitate to let us know at **softEcon@policy-lab.org**.
 
 Contact:
 
