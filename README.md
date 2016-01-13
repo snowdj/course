@@ -6,8 +6,6 @@ We acquire fundamental software engineering skills to tackle computer intensive 
 
 Check out the course [syllabus](https://github.com/softEcon/course/blob/master/syllabus.pdf) for details. A broader perspective about the *Software Engineering for Economists Initiative* is provided [here](http://slideviewer.herokuapp.com/github/softEcon/overview/blob/master/initiative.ipynb?create=1). We use a Virtual Machine for the class and its image is available [online](https://atlas.hashicorp.com/softEcon/boxes/base). 
 
-We cordially invite fellow economists to submit lectures about topics they care about. If you are interested in contributing, please do not hesitate to let us know at <softEcon@policy-lab.org>.
-
 Contact:
 
 [![Join the chat at https://gitter.im/softEcon/contact](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/softEcon/contact?utm_source=share-link&utm_medium=link&utm_campaign=share-link
@@ -34,11 +32,6 @@ Contact:
     * [Module](http://nbviewer.ipython.org/github/grmToolbox/module/blob/master/lecture/lecture.ipynb) 
     * [Private Package](http://nbviewer.ipython.org/github/grmToolbox/private.package/blob/master/lecture/lecture.ipynb)
     * [Public Package](http://nbviewer.ipython.org/github/grmToolbox/public.package/blob/master/lecture/lecture.ipynb)
-
-##### Special Topics
-  * [Toolkit for Advanced Optimization](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/special_topics/toolkit_for_advanced_optimization/lecture.ipynb) 
-
-
 
 ## Guest Presentations
 
