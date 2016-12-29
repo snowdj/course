@@ -1,0 +1,219 @@
+\input{files/s-header}
+\input{files/s-title}
+
+\begin{document}\vspace{-3cm}
+
+\input{files/s-titlepage}\doublespacing
+\thispagestyle{empty}\vspace{-2cm}
+
+%------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
+\vspace{0.3cm}\begin{manquotation}{Richard Feynman} What I cannot create, I do not understand.
+\end{manquotation}
+%------------------------------------------------------------------------------
+\subsection*{Description}\vspace{0.5cm}
+%------------------------------------------------------------------------------
+We acquire basic software engineering skills to tackle computer-intensive economic research projects. During lectures and a group project, we explore the following set of topics:
+%
+\begin{multicols}{2}
+\begin{itemize}
+\item Version Control
+\item Unit Testing
+\item Debugging and Profiling
+\item Code Documentation
+\item Design Patterns
+\item Data Management
+\item Cloud Computing
+\item High Performance Computing
+\end{itemize}
+\end{multicols}
+%
+\noindent These basic techniques allow us to leverage tools from computational science, increase the transparency of our implementations, and ensure the recomputability of results. Thus, they expand the set of possible economic questions that we can address and improve the quality of our answers.\\\newline
+%
+\noindent Additional information and background material is provided on the course website:
+\begin{center}
+\url{http://policy-lab.org/teaching/softEcon} 
+\end{center}\vspace{0.3cm}
+%
+\noindent This class is accompanied by the \href{http://bfi.uchicago.edu/events/computational-economics-colloquium}{\textit{Computational Economics Colloquium}}, where experienced researchers present their innovative approaches to economic modeling, numerical methods, and software engineering. Guest lectures by the \href{https://rcc.uchicago.edu}{\textit{Research Computing Center}}, the \href{https://sscs.uchicago.edu}{\textit{Social Sciences Computing Services}}, and the  \href{https://www.ci.uchicago.edu/}{\textit{Computation Institute}} introduce us to the computing infrastructure at the University of Chicago and the advanced application of computational methods in scientific research.\\\newline
+%
+\noindent For additional information, please contact us at \verb+softEcon@policy-lab.org+.
+%------------------------------------------------------------------------------
+\subsection*{Group Project}\vspace{0.5cm}
+%------------------------------------------------------------------------------
+The group projects consist of a contribution to \href{http://quant-econ.net}{\textit{Quantitative Economics}}, an open source library for quantitative economic modeling. Each group prepares a high-quality implementation of a quantitative economic model of their choice. We will build on existing material provided as code supplements to several economic textbooks (see course website for selected references). As the course moves along, we use our newly acquired skills to iteratively improve our workflow and the quality of our implementations. Groups report on their progress and receive feedback in a series of presentations throughout the semester.
+%------------------------------------------------------------------------------
+\subsection*{Tools}\vspace{0.5cm}
+%------------------------------------------------------------------------------
+\noindent We rely five main tools in the class: (1) \href{https://www.python.org/}{\textit{Python}}, (2) \href{http://www.ubuntu.com/}{\textit{Ubuntu}}, (3) \href{http://www.azure.microsoft.com/en-us/}{\textit{Microsoft Azure}}, (4) \href{http://policy-lab.org/structToolbox/}{\textit{structToolbox}}, and (5) \href{http://quant-econ.net}{\textit{Quantitative Economics}}.
+
+\begin{itemize}
+%------------------------------------------------------------------------------
+\item  The \textbf{\textit{Python}}  programming language is accessible to novice programmers seeking to develop software engineering skills, and powerful enough for serious computation. \textit{Python} is used by computer programmers and scientists alike. Thus, it provides the tools used in software engineering as well as numerous libraries for scientific computing. In addition, \textit{Python} is an open source project easily linked with other languages such as \textit{Fortran} and \textit{C}. 
+%------------------------------------------------------------------------------
+\item \textbf{\textit{Ubuntu}} is a Linux-based operating system. It is based on the principle of open-source development and users are encouraged to use free software, study how it works, improve upon it, and distribute it. Using \textit{Ubuntu} serves as a preparation for the use of high performance computing clusters, which mostly rely on Linux-based operating systems.
+%------------------------------------------------------------------------------
+\item \textbf{\textit{Microsoft Azure}}  is a cloud computing platform which provides the power and scalability required for collaboration, high performance computation, and data-intensive processing. Class participants receive access to the cloud using \textit{Microsoft Azure Academic Passes} for six months.
+%------------------------------------------------------------------------------
+\item The \textbf{\textit{structToolbox}} is a computer program for the simulation and estimation of a dynamic model of female labor supply  decisions \citep{Keane.2011d}. It is designed as a teaching tool to show how, by acquiring software engineering skills, structural econometricians can more readily absorb research from computational science, improve the transparency of implementations, and ensure recomputability of results.
+%------------------------------------------------------------------------------
+\item The \textbf{\textit{Quantitiative Economics}} website provides a series of lectures on quantitative economic modelling using \textit{Python}. Topics include economic theory and empirics, mathematical and statistical concepts related to quantitative economics, algorithms and numerical methods for studying economic problems, and coding skills.
+\end{itemize}
+%------------------------------------------------------------------------------
+\subsection*{Prerequisites}\vspace{0.5cm}
+%------------------------------------------------------------------------------
+This class requires a basic knowledge of the  \textit{Ubuntu} operating system and  \textit{Python} programming language. For novices, we offer a \textit{Software Engineering Bootcamp} in the week before regular classes start to catch up on these basics. The \href{https://scipy-lectures.github.io/}{\textit{Python Scientific Lecture Notes}} and the \href{http://ubuntu-manual.org}{\textit{Ubuntu Manual}} provide our starting point. We also provide additional resources on the course website that allow for independent study.
+%------------------------------------------------------------------------------
+\subsection*{Team}\vspace{0.5cm}
+%------------------------------------------------------------------------------
+\begin{tabular}{l@{\qquad}ll}
+Philipp Eisenhauer & Contact: & \href{mailto:eisenhauer@policy-lab.org}{eisenhauer@policy-lab.org} \\ 
+&  Office Hours: & by appointment\\
+&&\\
+Yike Wang & Contact: & \href{mailto:ywang@policy-lab.org}{ywang@policy-lab.org}   \\ 
+&  Office Hours: & by appointment
+\end{tabular}\vspace{1cm}
+
+%------------------------------------------------------------------------------
+\subsection*{Time}\vspace{0.5cm}
+%------------------------------------------------------------------------------
+\begin{tabular}{l@{\qquad\qquad}l}
+Lectures	&  Mondays and Wednesdays, 1:30-2:50, Saieh Hall for Economics, \#247 \\
+TA Sessions	&  Fridays, 2:30-3:20, Saieh Hall for Economics, \#247  \\
+Colloquium & Thursdays, 5:00-7:00, Saieh Hall for Economics, \#021 
+\end{tabular}\vspace{1.0cm}
+%------------------------------------------------------------------------------
+\subsection*{References}\vspace{0.5cm}
+%------------------------------------------------------------------------------
+The basic ideas behind software engineering, independent of any particular tools, are presented in:
+%
+\begin{itemize}
+\item Steve McConnell, \textit{Code Complete: A Practical Handbook of Software Construction}, Microsoft Press, Seattle, WA.
+\end{itemize}
+%
+\noindent Numerous additional references are available on the course website.
+%------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
+\subsection*{Schedule} 
+%------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
+\begin{itemize}
+%------------------------------------------------------------------------------
+\item \textbf{Week 1}
+%------------------------------------------------------------------------------
+	\begin{itemize}
+	\item Introduction
+	\end{itemize}
+%------------------------------------------------------------------------------
+\item \textbf{Week 2}
+%------------------------------------------------------------------------------
+	\begin{itemize}
+	\item Cloud Computing
+		\begin{itemize}
+		\item Exploit the resources and scalability of the cloud in your research.
+		\end{itemize}	
+	\item \textbf{Special Event:} Computational Economics Colloquium 
+	\end{itemize}
+%------------------------------------------------------------------------------
+\item \textbf{Week 3}
+%------------------------------------------------------------------------------
+	\begin{itemize}
+	\item Version Control
+		\begin{itemize}
+		\item Record changes to your computer program over time to recall specific versions later.
+		\end{itemize}
+	\end{itemize}
+%------------------------------------------------------------------------------
+\item \textbf{Week 4}
+%------------------------------------------------------------------------------
+	\begin{itemize}
+	\item Debugging and Testing
+		\begin{itemize}
+		\item Examine the correctness of your computer program and its components.
+		\end{itemize}
+	\item \textbf{Special Event:} Computational Economics Colloquium
+	\end{itemize}
+%------------------------------------------------------------------------------
+\item \textbf{Week 5} 
+%------------------------------------------------------------------------------
+	\begin{itemize}
+	\item  Profiling and Code Optimization
+		\begin{itemize}
+		\item Measure the performance of your computer program and identify the frequency and duration of function calls. Modify it for more rapid execution and less memory use.
+		\end{itemize}
+	\end{itemize}
+%------------------------------------------------------------------------------
+\item \textbf{Week 6} 
+%------------------------------------------------------------------------------
+	\begin{itemize}
+	\item Code Documentation
+		\begin{itemize}
+		\item Document your computer program to inform fellow researchers about what it does and how it does it.
+		\end{itemize}
+	\end{itemize}
+%------------------------------------------------------------------------------
+\item \textbf{Week 7} 
+%------------------------------------------------------------------------------
+	\begin{itemize}
+	\item Design Patterns
+		\begin{itemize}
+		\item Create reusable components of your computer program to use them in multiple research projects.
+		\end{itemize}
+	\item \textbf{Special Guest:} Social Sciences Computing Services
+	\end{itemize}
+%------------------------------------------------------------------------------
+\item \textbf{Week 8} 
+%------------------------------------------------------------------------------
+	\begin{itemize}
+	\item Data Management	
+		\begin{itemize}
+		\item Control the information you use and generate during your research project.	
+		\end{itemize}
+	\item \textbf{Special Guest:} Research Computing Center
+	\item \textbf{Special Event:} Computational Economics Colloquium
+	\end{itemize}
+%------------------------------------------------------------------------------
+\item \textbf{Week 9} 
+%------------------------------------------------------------------------------
+	\begin{itemize}
+	\item High Performance Computing
+		\begin{itemize}
+		\item Aggregate computing power to tackle computation-intensive projects.
+		\end{itemize}
+	\end{itemize}
+%------------------------------------------------------------------------------
+\item \textbf{Week 10}  
+%------------------------------------------------------------------------------
+	\begin{itemize}
+	\item Virtual Machines
+		\begin{itemize}
+		\item Take advantage of virtual machines to increase the transparency of your programming choices and ensure full recomputability of your results.
+		\end{itemize}
+	\end{itemize}
+\end{itemize}
+
+
+\newpage\subsection*{Links}\vspace{0.5cm}
+
+\begin{tabular}{ll}
+
+\textit{Python} 	& \url{https://www.python.org}\\ [1ex]
+\textit{Ubuntu} 	& \url{http://www.ubuntu.com}\\ [1ex]
+\textit{Microsoft Azure} 	& \url{http://www.azure.microsoft.com}\\ [1ex]
+\textit{structToolbox} 	& \url{http://policy-lab.org/structToolbox}\\ [1ex]
+\textit{Quantitative Economics} 	& \url{http://quant-econ.net}\\ [1ex]
+\textit{Python Scientific Lecture Notes} 	& \url{https://scipy-lectures.github.io}\\ [1ex]
+\textit{Ubuntu Manual} 	& \url{http://ubuntu-manual.org}\\ [1ex]
+\textit{Social Sciences Computing Services} 	& \url{https://sscs.uchicago.edu}\\ [1ex]
+\textit{Research Computing Center} & \url{https://rcc.uchicago.edu}\\ [2ex]
+\textit{Computation Institute} & \url{https://www.ci.uchicago.edu}\\ [2ex]
+\textit{Computational Economics Colloquium} & \\
+\mc{2}{l}{\hspace{1.0cm}\url{http://bfi.uchicago.edu/events/computational-economics-colloquium}}\\ [1ex]
+\end{tabular}\vspace{0.5cm}
+
+
+\bibliography{../../ext/bib/literature}
+\bibliographystyle{apalike}
+
+\end{document}
+\grid
