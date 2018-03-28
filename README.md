@@ -27,11 +27,11 @@ Contact:
  * [Carrer Choices](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/economic_models/career_choices/lecture.ipynb)
  * [Job Search](http://nbviewer.ipython.org/github/softEcon/course/blob/master/lectures/economic_models/job_search/lecture.ipynb)
  * Generalized Roy
- 	* [Model](http://nbviewer.ipython.org/github/grmToolbox/model/blob/master/lecture/lecture.ipynb)
-   	* [Notebook](http://nbviewer.ipython.org/github/grmToolbox/notebook/blob/master/lecture/lecture.ipynb)
-    * [Module](http://nbviewer.ipython.org/github/grmToolbox/module/blob/master/lecture/lecture.ipynb)
-    * [Private Package](http://nbviewer.ipython.org/github/grmToolbox/private.package/blob/master/lecture/lecture.ipynb)
-    * [Public Package](http://nbviewer.ipython.org/github/grmToolbox/public.package/blob/master/lecture/lecture.ipynb)
+ 	* [Model](http://nbviewer.jupyter.org/github/softEcon/course/blob/master/lectures/economic_models/generalized_roy/model/lecture.ipynb)
+   	* [Notebook](http://nbviewer.jupyter.org/github/softEcon/course/blob/master/lectures/economic_models/generalized_roy/notebook/lecture.ipynb)
+    * [Module](http://nbviewer.jupyter.org/github/softEcon/course/blob/master/lectures/economic_models/generalized_roy/module/lecture.ipynb)
+    * [Private Package](http://nbviewer.jupyter.org/github/softEcon/course/blob/master/lectures/economic_models/generalized_roy/private_package/lecture.ipynb)
+    * [Public Package](http://grmpy.readthedocs.io)
 
 ## Guest Presentations
 
